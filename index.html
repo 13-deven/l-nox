@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LISA NOX — Onirophobie</title>
+    <meta name="description" content="LISA NOX. Voix entre deux mondes. Univers Onirophobie.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A0A0F',
+                        secondary: '#1A1A24',
+                        accent: '#4A3B8C',
+                        silver: '#8899B3',
+                    },
+                    fontFamily: {
+                        title: ['Cinzel', 'serif'],
+                        body: ['Inter', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'grain': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.08%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0A0A0F; }
+        ::-webkit-scrollbar-thumb { background: #4A3B8C; border-radius: 3px; }
+
+        /* Utilities */
+        .text-glow { text-shadow: 0 0 20px rgba(74, 59, 140, 0.5); }
+        .text-glow-strong { text-shadow: 0 0 30px rgba(74, 59, 140, 0.8), 0 0 10px #fff; }
+        .liquid-hover { transition: all 0.4s ease; }
+        .liquid-hover:hover { filter: drop-shadow(0 0 12px rgba(136, 153, 179, 0.6)); transform: scale(1.02); }
+        
+        /* Loader */
+        #loader { position: fixed; inset: 0; z-index: 9999; background: #0A0A0F; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
+        #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-text { font-family: 'Cinzel', serif; color: #fff; font-size: 1.2rem; letter-spacing: 0.3em; opacity: 0; animation: pulseFade 2s ease-in-out infinite; }
+        
+        /* Animations */
+        @keyframes pulseFade {
+            0%, 100% { opacity: 0.3; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+
+        /* Cursor */
+        #cursor { position: fixed; width: 20px; height: 20px; border: 1px solid #8899B3; border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background 0.2s; mix-blend-mode: difference; }
+        #cursor.hovered { width: 50px; height: 50px; background: rgba(74, 59, 140, 0.3); border-color: #4A3B8C; }
+
+        /* Reveal Classes */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* Masonry Layout */
+        .masonry-grid { column-count: 1; column-gap: 1rem; }
+        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        .masonry-item { break-inside: avoid; margin-bottom: 1rem; }
+
+        /* Mobile Menu */
+        .mobile-menu { transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .mobile-menu.open { transform: translateX(0); }
+        .mobile-menu a { transform: translateX(20px); opacity: 0; transition: all 0.4s ease; }
+        .mobile-menu.open a { transform: translateX(0); opacity: 1; }
+
+    </style>
+
+
+
+
+<style>
+/* Toggle audio — position DROITE + néon fushia */
+#audioToggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px; /* ← CHANGEMENT : droite au lieu de centre */
+    left: auto;  /* ← CHANGEMENT : annule le centrage */
+    transform: none; /* ← CHANGEMENT : supprime translateX */
+    z-index: 100;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 0, 150, 0.4); /* ← CHANGEMENT : bordure rose */
+    border-radius: 50%;
+    background: rgba(10, 10, 15, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    opacity: 0.9;
+    /* ← AJOUT : glow néon permanent subtil */
+    box-shadow: 0 0 10px rgba(255, 0, 150, 0.2), 
+                0 0 20px rgba(255, 0, 150, 0.1);
+}
+
+/* Hover + actif — néon intense */
+#audioToggle:hover,
+#audioToggle.active {
+    border-color: #FF00AA; /* ← CHANGEMENT : rose fushia pur */
+    color: #FF00AA;
+    opacity: 1;
+    /* ← AJOUT : glow néon puissant */
+    box-shadow: 0 0 15px rgba(255, 0, 170, 0.6), 
+                0 0 30px rgba(255, 0, 170, 0.4),
+                0 0 45px rgba(255, 0, 170, 0.2);
+    animation: pulse-neon 2s ease-in-out infinite;
+}
+
+/* ← AJOUT : animation pulsation néon */
+@keyframes pulse-neon {
+    0%, 100% { 
+        box-shadow: 0 0 15px rgba(255,0,170,0.6), 
+                    0 0 30px rgba(255,0,170,0.4); 
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(255,0,170,0.9), 
+                    0 0 40px rgba(255,0,170,0.6),
+                    0 0 60px rgba(255,0,170,0.3); 
+    }
+}
+
+/* Icônes — couleur néon */
+#audioToggle svg {
+    width: 18px;
+    height: 18px;
+    transition: opacity 0.2s ease, stroke 0.2s ease;
+    stroke: #FF66CC; /* ← CHANGEMENT : rose clair par défaut */
+}
+#audioToggle:hover svg,
+#audioToggle.active svg {
+    stroke: #FF00AA; /* ← CHANGEMENT : rose fushia au hover/actif */
+}
+
+/* Hint — coordonné néon */
+#audioHint {
+    position: fixed;
+    bottom: 80px;
+    right: 24px; /* ← CHANGEMENT : aligné à droite sous l'icône */
+    left: auto;
+    transform: none;
+    z-index: 99;
+    padding: 6px 14px;
+    background: rgba(26, 26, 36, 0.98);
+    border: 1px solid rgba(255, 0, 170, 0.5); /* ← CHANGEMENT : bordure rose */
+    border-radius: 18px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #FF66CC; /* ← CHANGEMENT : texte rose */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(255, 0, 170, 0.4); /* ← AJOUT : glow texte */
+}
+#audioHint.visible { opacity: 1; }
+</style>
+
+
+
+
+
+</head>
+<body class="bg-primary text-white font-body overflow-x-hidden selection:bg-accent selection:text-white">
+
+    <!-- Grain Overlay -->
+    <div class="fixed inset-0 pointer-events-none z-40 bg-grain opacity-60"></div>
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+
+    <!-- Loader -->
+    <div id="loader">
+        <h1 class="font-title text-4xl md:text-6xl text-white mb-4 tracking-widest text-glow">LISA NOX</h1>
+        <p class="loader-text text-silver text-xs md:text-sm tracking-[0.4em]">Ce qui dort ne ment jamais.</p>
+    </div>
+
+    <!-- Particle Canvas -->
+    <canvas id="particleCanvas" class="fixed inset-0 z-0"></canvas>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference">
+        <a href="#" class="font-title text-xl md:text-2xl font-bold tracking-widest hover:text-silver transition-colors cursor-hover">LISA NOX</a>
+        
+        <div class="hidden md:flex gap-8 items-center">
+            <a href="#univers" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">UNIVERS</a>
+            <a href="#musique" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">MUSIQUE</a>
+            <a href="#visuels" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">VISUELS</a>
+            <a href="#presskit" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">PRESS KIT</a>
+            <a href="#contact" class="px-5 py-2 rounded-full border border-accent/40 text-xs tracking-[0.15em] text-silver hover:bg-accent hover:text-white hover:border-accent transition-all cursor-hover liquid-hover">CONTACT</a>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="md:hidden flex flex-col gap-1.5 cursor-hover group" id="menuToggle">
+            <span class="block w-6 h-0.5 bg-white transition-transform duration-300 group-hover:w-8"></span>
+            <span class="block w-4 h-0.5 bg-white ml-auto transition-all duration-300 group-hover:w-8"></span>
+            <span class="block w-6 h-0.5 bg-white transition-transform duration-300 group-hover:w-8"></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 z-40 bg-primary/95 backdrop-blur-md flex flex-col items-center justify-center gap-8 transform translate-x-full transition-transform duration-500 ease-in-out">
+        <a href="#univers" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">UNIVERS</a>
+        <a href="#musique" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">MUSIQUE</a>
+        <a href="#visuels" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">VISUELS</a>
+        <a href="#presskit" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">PRESS KIT</a>
+        <a href="#contact" class="px-5 py-2 rounded-full border border-accent/40 text-xs tracking-[0.15em] text-silver hover:bg-accent hover:text-white hover:border-accent transition-all cursor-hover liquid-hover">CONTACT</a>        
+        <button id="closeMenu" class="absolute top-6 right-6 text-white cursor-hover">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+    </div>
+    <!-- Main Content -->
+    <main class="relative z-10">
+        
+        <!-- Hero Section -->
+        <section class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse"></div>
+            
+            <p class="text-silver text-xs md:text-sm tracking-[0.5em] mb-4 reveal">VOIX ENTRE DEUX MONDES</p>
+            
+            <h1 class="font-title text-5xl md:text-8xl lg:text-9xl font-bold mb-6 leading-tight reveal" style="transition-delay: 0.1s;">
+                <span class="block text-white">LISA</span>
+                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-accent to-silver">NOX</span>
+            </h1>
+            
+            <p class="text-sm md:text-base text-gray-400 max-w-md mx-auto mb-12 tracking-wide reveal" style="transition-delay: 0.2s;">
+                Je suis celle qui rêve.<br>
+                Chaque note est un fragment de rêve brisé.
+            </p>
+            
+            <a href="#univers" class="group relative px-8 py-3 overflow-hidden rounded-full border border-silver/30 hover:border-accent transition-colors duration-500 cursor-hover reveal" style="transition-delay: 0.3s;">
+                <span class="relative z-10 text-xs tracking-[0.3em] font-medium group-hover:text-white transition-colors">↓ ENTRER</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-accent to-silver opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-md"></div>
+                <div class="absolute inset-0 bg-accent/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
+            </a>
+        </section>
+
+        <!-- Univers Section -->
+        <section id="univers" class="min-h-screen py-24 px-6 md:px-12 flex flex-col justify-center relative overflow-hidden">
+            <!-- Background Element -->
+            <div class="absolute right-0 top-1/4 w-1/3 h-1/2 bg-gradient-to-l from-secondary/50 to-transparent -z-10 blur-3xl"></div>
+
+            <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                <div class="reveal">
+                    <h2 class="font-title text-4xl md:text-5xl mb-6 text-white">ONIROPHOBIE</h2>
+                    <div class="h-0.5 w-20 bg-gradient-to-r from-accent to-silver mb-6"></div>
+                    <p class="text-gray-300 leading-relaxed mb-6 text-lg">
+                        LISA voit ce que les autres ne voient pas. Ses rêves annoncent la mort. Elle marche entre les lignes du destin, tissant des mélodies là où la réalité se fracture.
+                    </p>
+                    <p class="text-silver text-sm italic border-l-2 border-accent pl-4">
+                        "La frontière entre le sommeil et l'éternité est plus fine qu'un fil de soie."
+                    </p>
+                </div>
+                
+                <div class="relative reveal" style="transition-delay: 0.2s;">
+                    <!-- Generated Image Placeholder for Artist Avatar/Art -->
+                    <div class="aspect-[3/4] rounded-lg overflow-hidden border border-white/5 relative group cursor-hover">
+                        <img src="assets/photo_lisa-01.jpg" alt="LISA NOX Art" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6">
+                            <p class="font-title text-xl text-white">Cycle 01</p>
+                            <p class="text-xs text-silver tracking-widest">SOMMEIL FRACTURÉ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+ <!-- Univers Section -->
+        <section id="univers" class="py-24 md:py-32 px-6 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-16 items-start">
+                    <div class="md:w-1/3 sticky top-24 reveal">
+                        <h2 class="font-title text-4xl md:text-5xl mb-4 text-white">UNIVERS</h2>
+                        <div class="h-[1px] w-16 bg-gradient-to-r from-accent to-transparent mb-6"></div>
+                        <p class="text-silver text-sm leading-relaxed italic border-l-2 border-accent pl-4">
+                            "LISA voit ce que les autres ne voient pas. Ses rêves annoncent la mort. Elle marche entre les lignes du destin."
+                        </p>
+                    </div>
+                    <div class="md:w-2/3 space-y-12">
+                        <!-- Timeline Item 1 -->
+                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.1s;">
+                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-accent ring-4 ring-primary"></div>
+                            <span class="text-xs text-accent tracking-widest mb-2 block">CYCLE 01 — SOMMEIL FRACTURÉ</span>
+                            <h3 class="font-title text-2xl mb-3 text-white">Le Premier Rêve</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">
+                                Les murs se dissolvent. La réalité cède. LISA découvre sa capacité à naviguer dans les limbes, là où les souvenirs des autres prennent forme.
+                            </p>
+                        </div>
+                        <!-- Timeline Item 2 -->
+                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.2s;">
+                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-secondary ring-4 ring-primary border border-accent/50"></div>
+                            <span class="text-xs text-silver tracking-widest mb-2 block">CYCLE 02 — ONIROPHOBIE</span>
+                            <h3 class="font-title text-2xl mb-3 text-white">La Peur de Dormir</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">
+                                Chaque nuit apporte une vision. Chaque vision est un avertissement. La frontière s'amincit. La musique devient le seul fil qui la retient.
+                            </p>
+                        </div>
+                        <!-- Timeline Item 3 -->
+                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.3s;">
+                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-transparent ring-4 ring-primary border border-white/20"></div>
+                            <span class="text-xs text-gray-500 tracking-widest mb-2 block">CYCLE 03 — EN COURS</span>
+                            <h3 class="font-title text-2xl mb-3 text-white">L'Écho Final</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">
+                                À venir. Ce cycle explorera la convergence des mondes. Les fragments s'assemblent. La vérité onirique se révèle.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <!-- Musique Section -->
+        <section id="musique" class="py-24 px-6 bg-secondary/30 border-y border-white/5 relative">
+            <div class="max-w-5xl mx-auto">
+                <h2 class="font-title text-3xl md:text-4xl text-center mb-16 reveal">MUSIQUE</h2>
+                <p class="text-sm text-gray-400 max-w-md mx-auto text-center">Extraits sonores des cycles. Intégration native à venir.</p>
+                <br><br>
+                <iframe 
+                    src="https://youtu.be/dnDUHVQ5JMA?si=X-PPx-FrpFCagJeC"
+                    loading="lazy"
+                    title="LISA NOX - [Titre Clip]"
+                    class="video-embed dp-dark-theme"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+                <br><br>
+<div class="section" id="music">
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dnDUHVQ5JMA?si=DExHfKQ-bgMc8f_3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+<br><br>
+
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Track Card -->
+                    <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/3x7KtJgZA58ikpWwiFW67U?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <!-- Track Card -->
+                    <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/05NobfdAPn7Xn8PZIWF58x?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <!-- Track Card -->
+                     <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/10UuuuduvB6k3Rvw5vlTjV?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>     
+        <div class="text-center mt-12 reveal">
+                    <a href="https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA" target="_blank" class="inline-flex items-center gap-2 text-xs tracking-[0.2em] text-silver hover:text-white transition-colors cursor-hover border-b border-silver/30 hover:border-white pb-1">
+                        Écouter sur Spotify
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <br><br>
+                    <a href="https://music.apple.com/us/artist/lisa-nox/1890800102" target="_blank" class="inline-flex items-center gap-2 text-xs tracking-[0.2em] text-silver hover:text-white transition-colors cursor-hover border-b border-silver/30 hover:border-white pb-1">
+                        Écouter sur Apple music
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+ <!-- Visuels Section -->
+        <section id="visuels" class="py-24 px-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-12 reveal">
+                    <div>
+                        <h2 class="font-title text-4xl md:text-5xl text-white mb-4">VISUELS / COVERS</h2>
+                        <p class="text-sm text-gray-400 max-w-md">Fenêtres sur l'invisible. Générés, sélectionnés, révélés.</p>
+                    </div>
+                    <div class="flex gap-3 mt-6 md:mt-0">
+                        <button class="filter-btn active text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-accent bg-accent/20 text-white cursor-hover transition-all" data-filter="all">TOUS</button>
+                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="lucide">RÊVE LUCIDE</button>
+                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="cauchemar">CAUCHEMAR</button>
+                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="limbes">LIMBES</button>
+                    </div>
+                </div>
+
+                <div class="masonry-grid" id="galleryGrid">
+                    <!-- Item 1 -->
+                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="lucide">
+                        <img src="assets/reve-02.jpg" alt="Rêve Lucide 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <p class="text-white font-title text-sm">Éther Cristallin</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Midjourney v6 • Prompt: floating crystals</p>
+                        </div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="cauchemar" style="transition-delay: 0.1s;">
+                        <img src="assets/cauchemar-01.jpg" alt="Cauchemar 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <p class="text-white font-title text-sm">Ombre Déformée</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Stable Diffusion XL • Model: Nightmare</p>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="limbes" style="transition-delay: 0.2s;">
+                        <img src="assets/limbes.jpg" alt="Limbes 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <p class="text-white font-title text-sm">Zone Nulle</p>
+                            <p class="text-[10px] text-gray-400 mt-1">DALL-E 3 • Prompt: ethereal void</p>
+                        </div>
+                    </div>
+                    <!-- Item 4 -->
+                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="lucide" style="transition-delay: 0.15s;">
+                        <img src="assets/reve-01.jpg" alt="Rêve Lucide 2" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <p class="text-white font-title text-sm">Convergence</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Midjourney v6 • Prompt: geometric shapes</p>
+                        </div>
+                    </div>
+                    <!-- Item 5 -->
+                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="cauchemar" style="transition-delay: 0.25s;">
+                        <img src="assets/cauchemar-02.jpg" alt="Cauchemar 2" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <p class="text-white font-title text-sm">Miroir Fracturé</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Flux • Prompt: broken mirror</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Press Kit Section -->
+        <section id="presskit" class="py-24 px-6 bg-secondary/30 border-y border-white/5">
+            <div class="max-w-3xl mx-auto text-center reveal">
+                <h2 class="font-title text-3xl md:text-4xl text-white mb-6">PRESS KIT</h2>
+                <p class="text-gray-400 text-sm mb-8 max-w-xl mx-auto">
+                    Accès médias. Contient biographie officielle, visuels HD (3000px), logos vectoriels, contacts presse et liens streaming.
+                </p>
+                <a href="#" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-accent/20 to-transparent border border-accent/40 hover:border-accent hover:bg-accent/30 transition-all rounded-lg cursor-hover group">
+                    <svg class="w-5 h-5 text-silver group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span class="text-xs tracking-[0.2em] font-medium text-silver group-hover:text-white transition-colors">TÉLÉCHARGER (PDF)</span>
+                </a>
+                <p class="text-[10px] text-gray-600 mt-4 tracking-wider">Fichier: LISANOX_PressKit_2026.pdf • Mise à jour: Mai 2026</p>
+            </div>
+        </section>
+
+        <!-- Contact / Newsletter Section -->
+        <section id="contact" class="py-24 px-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-accent/10 to-transparent blur-3xl -z-10"></div>
+            <div class="max-w-2xl mx-auto text-center reveal">
+                <p class="text-silver text-xs tracking-[0.4em] mb-4">REJOINDRE</p>
+                <h2 class="font-title text-3xl md:text-5xl text-white mb-6">ENTRER DANS LE CERCLE</h2>
+                <p class="text-gray-400 mb-8">Recevez en avant-première les fragments audio, les visuels exclusifs et les annonces des prochains cycles. Lead Magnet : Fond d'écran HD + Extrait 30s.</p>
+                
+                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onsubmit="event.preventDefault(); alert('Merci. Vérifiez votre inbox pour la validation double opt-in.');">
+                    <input type="email" placeholder="votre.email@domaine.com" required class="flex-1 bg-primary/80 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent transition-colors">
+                    <button type="submit" class="px-6 py-3 bg-accent text-white rounded-lg text-xs tracking-widest hover:bg-silver hover:text-primary transition-all cursor-hover font-medium">
+                        VALIDER
+                    </button>
+                </form>
+                <p class="text-[10px] text-gray-600 mt-4">Double opt-in requis. Aucun spam. Désinscription en un clic. <a href="" class="underline hover:text-gray-400">Politique RGPD</a></p>
+            </div>
+        </section>
+
+
+        <!-- Support Section -->
+        <section id="support" class="min-h-[60vh] py-24 px-6 flex items-center justify-center text-center relative">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent opacity-50"></div>
+            
+            <div class="max-w-2xl mx-auto relative z-10 reveal">
+                <p class="text-silver text-xs tracking-[0.4em] mb-4">SOUTENIR</p>
+                <h2 class="font-title text-4xl md:text-5xl mb-8">REJOINDRE LE RÊVE</h2>
+                <p class="text-gray-400 mb-10">Accédez à l'interdit. Soutenez la création et découvrez les coulisses de l'Onirophobie.</p>
+                
+                <a href="https://fr.tipeee.com/onirophobie" target="_blank" class="liquid-hover inline-block px-10 py-4 bg-gradient-to-r from-accent to-silver text-primary font-bold text-sm tracking-[0.2em] rounded-full cursor-hover relative overflow-hidden group">
+                    <span class="relative z-10">SOUTENIR LISA NOX</span>
+                    <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12"></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-6 border-t border-white/5 bg-primary">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-center md:text-left">
+                    <a href="#" class="font-title text-xl mb-2">LISA NOX</a>
+                    <p class="text-[10px] text-gray-600 tracking-widest">© LISA NOX — Univers dp/ DEVEN PHOBE</p>
+                </div>
+                
+                <div class="flex gap-6">
+                    
+                    <a href="https://www.instagram.com/lisanox.official" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-silver transition-colors cursor-hover" aria-label="Instagram">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+                    </a>
+                    <a href="https://www.tiktok.com/@lisa.nox" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-silver transition-colors cursor-hover" aria-label="TikTok">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                    </a>
+                    <a href="https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-green-500 transition-colors cursor-hover" aria-label="Spotify">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15c3-1 5-1 8 0M7 12c4-1.5 6-1.5 10 0M6 9c5-2 7-2 12 0"/></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@lisanox.official" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors cursor-hover" aria-label="YouTube">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"/></svg>
+                    </a>               
+                </div>
+
+                <div class="flex gap-4 text-[10px] text-gray-600 tracking-wider">
+                    <a href="" class="hover:text-gray-400 cursor-hover">MENTIONS</a>
+                    <a href="" class="hover:text-gray-400 cursor-hover">RGPD</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Audio Toggle (Floating) -->
+<!-- Toggle Icon (bas centre) -->
+<button id="audioToggle" aria-label="Ambiance onirique" title="Activer/couper le son" style="
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:100;
+    width:40px; height:40px; border:1px solid rgba(255,255,255,0.12);
+    border-radius:50%; background:rgba(10,10,15,0.95);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:all 0.25s ease; opacity:0.9;
+">
+    <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;transition:opacity 0.2s;">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+    </svg>
+    <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;opacity:0;position:absolute;transition:opacity 0.2s;">
+        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        <path d="M16 13a3 3 0 0 0 3-3" stroke-linecap="round"/>
+        <path d="M19 9a6 6 0 0 0 6-6" stroke-linecap="round" opacity="0.6"/>
+    </svg>
+</button>
+
+<!-- Audio Element -->
+<audio id="ambientAudio" loop preload="auto" playsinline>
+    <source src="assets/audio/ambiance-onirique.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Script Ultra-Simple : Activation immédiate -->
+<script>
+(function() {
+    const audio = document.getElementById('ambientAudio');
+    const toggle = document.getElementById('audioToggle');
+    const iconOff = toggle.querySelector('.icon-off');
+    const iconOn = toggle.querySelector('.icon-on');
+    
+    audio.volume = 0.35; // -24 LUFS specs dp
+    let isPlaying = false;
+    let activated = false;
+
+    // Fonction d'activation audio + UI
+    const playAudio = async () => {
+        if (activated) return;
+        activated = true;
+        
+        try {
+            await audio.play();
+            isPlaying = true;
+            iconOff.style.opacity = '0';
+            iconOn.style.opacity = '1';
+            toggle.classList.add('active');
+            toggle.style.borderColor = '#4A3B8C';
+            toggle.style.boxShadow = '0 0 25px rgba(74,59,140,0.35)';
+        } catch (e) {
+            console.log('Audio blocked, waiting for next gesture');
+            activated = false; // Réessayer au prochain geste
+        }
+    };
+
+    // TOUS les événements possibles — sans filtre, sans condition
+    const events = [
+        'click','mousedown','mouseup','touchstart','touchend',
+        'keydown','keyup','wheel','scroll','mousemove','touchmove',
+        'focus','blur','resize','orientationchange'
+    ];
+
+    // Handler unique : joue + nettoie TOUT
+    const trigger = (e) => {
+        playAudio();
+        // Supprime TOUS les listeners après première tentative
+        events.forEach(evt => {
+            window.removeEventListener(evt, trigger, true);
+            window.removeEventListener(evt, trigger, false);
+            document.removeEventListener(evt, trigger, true);
+            document.removeEventListener(evt, trigger, false);
+        });
+    };
+
+    // Ajoute les listeners sur window ET document, capture ET bubble
+    events.forEach(evt => {
+        window.addEventListener(evt, trigger, true);
+        window.addEventListener(evt, trigger, false);
+        document.addEventListener(evt, trigger, true);
+        document.addEventListener(evt, trigger, false);
+    });
+
+    // Toggle manuel (mute/unmute) — toujours fonctionnel
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isPlaying) {
+            audio.pause();
+            isPlaying = false;
+            iconOff.style.opacity = '1';
+            iconOn.style.opacity = '0';
+            toggle.style.borderColor = 'rgba(255,255,255,0.12)';
+            toggle.style.boxShadow = 'none';
+        } else {
+            audio.play().then(() => {
+                isPlaying = true;
+                iconOff.style.opacity = '0';
+                iconOn.style.opacity = '1';
+                toggle.style.borderColor = '#4A3B8C';
+                toggle.style.boxShadow = '0 0 25px rgba(74,59,140,0.35)';
+            }).catch(() => {});
+        }
+    });
+
+    // Pause si onglet inactif
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isPlaying) audio.pause();
+        else if (!document.hidden && isPlaying) audio.play().catch(()=>{});
+    });
+})();
+</script>
+
+
+
+
+
+
+
+
+
+    <script>
+        // Loader Logic
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 2500);
+        });
+
+        // Scroll Reveal Logic
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        const cursorHoverElements = document.querySelectorAll('.cursor-hover');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        cursorHoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // Mobile Menu
+        const menuToggle = document.getElementById('menuToggle');
+        const closeMenu = document.getElementById('closeMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        menuToggle.addEventListener('click', () => mobileMenu.classList.remove('translate-x-full'));
+        closeMenu.addEventListener('click', () => mobileMenu.classList.add('translate-x-full'));
+        mobileLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('translate-x-full')));
+
+        // Audio Toggle Logic (Simulation)
+        const audioToggle = document.getElementById('audioToggle');
+        const iconSound = document.getElementById('icon-sound');
+        const iconMute = document.getElementById('icon-mute');
+        let isAudioOn = false;
+
+        audioToggle.addEventListener('click', () => {
+            isAudioOn = !isAudioOn;
+            if (isAudioOn) {
+                iconSound.classList.remove('hidden');
+                iconMute.classList.add('hidden');
+                audioToggle.classList.add('border-accent', 'text-accent');
+                // In a real app, play audio here
+            } else {
+                iconSound.classList.add('hidden');
+                iconMute.classList.remove('hidden');
+                audioToggle.classList.remove('border-accent', 'text-accent');
+            }
+        });
+
+                // Filter Logic (Visuels)
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const galleryItems = document.querySelectorAll('.masonry-item');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => { b.classList.remove('bg-accent/20', 'border-accent', 'text-white'); b.classList.add('border-white/10', 'text-gray-400'); });
+                btn.classList.remove('border-white/10', 'text-gray-400');
+                btn.classList.add('bg-accent/20', 'border-accent', 'text-white');
+                
+                const filter = btn.dataset.filter;
+                galleryItems.forEach(item => {
+                    if (filter === 'all' || item.dataset.category === filter) {
+                        item.style.display = 'block';
+                        setTimeout(() => item.style.opacity = '1', 50);
+                    } else {
+                        item.style.opacity = '0';
+                        setTimeout(() => item.style.display = 'none', 300);
+                    }
+                });
+            });
+        });
+
+        // Particle System
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.color = Math.random() > 0.8 ? '#4A3B8C' : '#8899B3';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            const count = window.innerWidth < 768 ? 40 : 80;
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+
+
+
+<!-- Container "13" (Overlay) -->
+<div id="thirteen-layer" style="position:fixed; inset:0; pointer-events:none; z-index:5; overflow:hidden;"></div>
+
+<!-- Styles pour l'animation et le rendu visuel -->
+<style>
+    /* Conteneur de chaque "13" */
+    .thirteen {
+        position: absolute;
+        pointer-events: none;
+        transform: rotate(var(--rotation));
+        transform-origin: center;
+        will-change: transform, opacity;
+    }
+
+    /* Le SVG en lui-même */
+    .thirteen svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* Le tracé (Path) du 13 */
+    .thirteen path {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: var(--stroke-width, 2);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        
+        /* Préparation de l'animation "dessin" */
+        stroke-dasharray: var(--dash-length, 160);
+        stroke-dashoffset: var(--dash-length, 160);
+        
+        /* Animations : Écriture puis Disparition */
+        animation: write var(--write-duration, 3s) cubic-bezier(0.4, 0, 0.2, 1) forwards, 
+                   fadeOut 1.5s ease-in var(--fade-delay, 3s) forwards;
+    }
+
+    /* Variante PREMIER PLAN */
+    .thirteen.foreground {
+        z-index: 20;
+        filter: drop-shadow(0 0 var(--glow-size, 10px) currentColor);
+        opacity: 0.95;
+    }
+
+    /* Variante ARRIÈRE-PLAN */
+    .thirteen.background {
+        z-index: 1;
+        opacity: 0.5;
+        filter: drop-shadow(0 0 var(--glow-size, 15px) currentColor);
+    }
+
+    /* Keyframes d'animation */
+    @keyframes write {
+        to { stroke-dashoffset: 0; }
+    }
+    @keyframes fadeOut {
+        to { opacity: 0; transform: rotate(var(--rotation)) scale(0.9); }
+    }
+
+    /* Ajustement Mobile */
+    @media (max-width: 768px) {
+        .thirteen { max-width: 150px; max-height: 150px; }
+    }
+</style>
+
+<!-- Script de génération et d'animation -->
+<script>
+(function() {
+    // === ⚙️ PARAMÈTRES AJUSTABLES ===
+    const CONFIG = {
+        // Taille : base en px, multiplicateur max (1x à 5x)
+        sizeBase: 60,
+        sizeMaxMultiplier: 5,
+        
+        // Palette de couleurs (ajoute/supprime des hex ici)
+        colors: [
+            { hex: '#4A3B8C', name: 'violet', glow: 0.5 },   // Indigo dp
+            { hex: '#FF00AA', name: 'fuchsia', glow: 0.8 },  // Néon rose
+            { hex: '#8899B3', name: 'argent', glow: 0.6 }    // Silver dp
+        ],
+        
+        // Variations de forme "13" manuscrit (SVG paths)
+        // Ajoute autant de variations que tu veux ici
+        paths: [
+           // Style 1: perso/ calligraphique
+            "m 2 5 L 5 1 L 5 22 M 12 1 C 14 1 18 1 19 4 C 19 7 17 8 14 10 C 14 10 19 11 20 13 C 22 16 20 22 11 22",
+
+           // Style 1: Élégant / calligraphique
+                "M 20 15 L 18 50 M 30 15 C 50 5, 55 25, 45 30 C 55 35, 45 50, 25 50",
+            // Style 5: Fluide / continu
+                "M 20 15 L 18 50 M 30 15 C 52 8, 58 22, 52 32 C 58 42, 48 52, 28 52",
+            // Style 7: Dramatique / contrasté
+                "M 22 10 L 18 52 M 34 14 C 54 6, 56 26, 46 32 C 54 40, 46 52, 26 52"
+        
+        ],
+        
+        // Épaisseur du trait (min/max en px)
+        strokeWidthMin: 1.5,
+        strokeWidthMax: 4,
+        
+        // Vitesse d'écriture (min/max en secondes)
+        writeDurationMin: 2,
+        writeDurationMax: 4,
+        
+        // Délai avant disparition (après la fin de l'écriture)
+        fadeDelay: 1,
+        
+        // Fréquence d'apparition (min/max en ms)
+        spawnDelayMin: 6000,
+        spawnDelayMax: 15000,
+        
+        // Maximum de "13" simultanés à l'écran
+        maxInstances: 3,
+        
+        // Probabilité d'être au premier plan (0.0 à 1.0)
+        foregroundProbability: 0.25,
+        
+        // Rotation max en degrés (-X à +X)
+        rotationMax: 35,
+        
+        // Marges par rapport aux bords de l'écran (en px)
+        margin: 40
+    };
+
+    // === LOGIQUE INTERNE (ne pas modifier sauf si nécessaire) ===
+    const layer = document.getElementById('thirteen-layer');
+    let activeCount = 0;
+
+    // Fonction utilitaire : nombre aléatoire entre min et max
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    
+    // Fonction utilitaire : élément aléatoire d'un tableau
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Fonction principale pour créer un "13"
+    const spawnThirteen = () => {
+        if (activeCount >= CONFIG.maxInstances) return;
+        activeCount++;
+
+        // 1. Taille aléatoire (1x à 5x la base)
+        const scale = rand(1, CONFIG.sizeMaxMultiplier);
+        const size = CONFIG.sizeBase * scale;
+
+        // 2. Position aléatoire (avec marges)
+        const x = rand(CONFIG.margin, window.innerWidth - size - CONFIG.margin);
+        const y = rand(CONFIG.margin, window.innerHeight - size - CONFIG.margin);
+
+        // 3. Choix de la couleur
+        const colorConfig = pick(CONFIG.colors);
+        
+        // 4. Choix du style d'écriture (path SVG)
+        const pathD = pick(CONFIG.paths);
+        
+        // 5. Calcul de la longueur du tracé pour l'animation (approximative)
+        // Plus le path est complexe, plus la dash-length doit être grande
+        const dashLength = 120 + (pathD.length * 0.8);
+        
+        // 6. Épaisseur du trait aléatoire
+        const strokeWidth = rand(CONFIG.strokeWidthMin, CONFIG.strokeWidthMax);
+        
+        // 7. Vitesse d'écriture aléatoire
+        const writeDuration = rand(CONFIG.writeDurationMin, CONFIG.writeDurationMax);
+        const fadeDelay = writeDuration + CONFIG.fadeDelay;
+        
+        // 8. Rotation aléatoire
+        const rotation = rand(-CONFIG.rotationMax, CONFIG.rotationMax);
+        
+        // 9. Premier plan ou arrière-plan ?
+        const isForeground = Math.random() < CONFIG.foregroundProbability;
+        
+        // 10. Taille du glow en fonction de la couleur et de l'échelle
+        const glowSize = (colorConfig.glow * 10) + (scale * 2);
+
+        // Création du conteneur
+        const el = document.createElement('div');
+        el.className = `thirteen ${isForeground ? 'foreground' : 'background'}`;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.width = `${size}px`;
+        el.style.height = `${size}px`;
+        el.style.color = colorConfig.hex;
+        el.style.setProperty('--rotation', `${rotation}deg`);
+        el.style.setProperty('--stroke-width', strokeWidth);
+        el.style.setProperty('--dash-length', dashLength);
+        el.style.setProperty('--write-duration', `${writeDuration}s`);
+        el.style.setProperty('--fade-delay', `${fadeDelay}s`);
+        el.style.setProperty('--glow-size', `${glowSize}px`);
+        
+        // Injection du SVG avec le path choisi
+        el.innerHTML = `
+            <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                <path d="${pathD}" />
+            </svg>
+        `;
+        
+        layer.appendChild(el);
+        
+        // Nettoyage automatique après la fin de l'animation
+        const totalDuration = (writeDuration + CONFIG.fadeDelay + 1.5) * 1000;
+        setTimeout(() => {
+            if (el.parentNode) {
+                el.style.transition = 'opacity 0.5s ease';
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    el.remove();
+                    activeCount--;
+                }, 500);
+            }
+        }, totalDuration);
+    };
+
+    // Planification de la prochaine apparition
+    const scheduleNext = () => {
+        const delay = rand(CONFIG.spawnDelayMin, CONFIG.spawnDelayMax);
+        setTimeout(() => {
+            spawnThirteen();
+            scheduleNext();
+        }, delay);
+    };
+
+    // Démarrage après 3 secondes (laisser le loader du site finir)
+    setTimeout(scheduleNext, 3000);
+
+    // Pause si onglet inactif (économie ressources)
+    document.addEventListener('visibilitychange', () => {
+        // Optionnel : suspendre les spawns si l'onglet est caché
+    });
+})();
+</script>
+</body>
+</html>
+
