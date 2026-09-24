@@ -1,1016 +1,1218 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LISA NOX — Onirophobie</title>
-    <meta name="description" content="LISA NOX. Voix entre deux mondes. Univers Onirophobie.">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#0A0A0F',
-                        secondary: '#1A1A24',
-                        accent: '#4A3B8C',
-                        silver: '#8899B3',
-                    },
-                    fontFamily: {
-                        title: ['Cinzel', 'serif'],
-                        body: ['Inter', 'sans-serif'],
-                    },
-                    backgroundImage: {
-                        'grain': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.85%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.08%22/%3E%3C/svg%3E')",
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0A0A0F; }
-        ::-webkit-scrollbar-thumb { background: #4A3B8C; border-radius: 3px; }
-
-        /* Utilities */
-        .text-glow { text-shadow: 0 0 20px rgba(74, 59, 140, 0.5); }
-        .text-glow-strong { text-shadow: 0 0 30px rgba(74, 59, 140, 0.8), 0 0 10px #fff; }
-        .liquid-hover { transition: all 0.4s ease; }
-        .liquid-hover:hover { filter: drop-shadow(0 0 12px rgba(136, 153, 179, 0.6)); transform: scale(1.02); }
-        
-        /* Loader */
-        #loader { position: fixed; inset: 0; z-index: 9999; background: #0A0A0F; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease, visibility 0.8s ease; }
-        #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-text { font-family: 'Cinzel', serif; color: #fff; font-size: 1.2rem; letter-spacing: 0.3em; opacity: 0; animation: pulseFade 2s ease-in-out infinite; }
-        
-        /* Animations */
-        @keyframes pulseFade {
-            0%, 100% { opacity: 0.3; transform: scale(0.98); }
-            50% { opacity: 1; transform: scale(1.02); }
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .float-anim { animation: float 6s ease-in-out infinite; }
-
-        /* Cursor */
-        #cursor { position: fixed; width: 20px; height: 20px; border: 1px solid #8899B3; border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s, background 0.2s; mix-blend-mode: difference; }
-        #cursor.hovered { width: 50px; height: 50px; background: rgba(74, 59, 140, 0.3); border-color: #4A3B8C; }
-
-        /* Reveal Classes */
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-
-        /* Masonry Layout */
-        .masonry-grid { column-count: 1; column-gap: 1rem; }
-        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-        .masonry-item { break-inside: avoid; margin-bottom: 1rem; }
-
-        /* Mobile Menu */
-        .mobile-menu { transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .mobile-menu.open { transform: translateX(0); }
-        .mobile-menu a { transform: translateX(20px); opacity: 0; transition: all 0.4s ease; }
-        .mobile-menu.open a { transform: translateX(0); opacity: 1; }
-
-    </style>
-
-
-
-
-<style>
-/* Toggle audio — position DROITE + néon fushia */
-#audioToggle {
-    position: fixed;
-    bottom: 24px;
-    right: 24px; /* ← CHANGEMENT : droite au lieu de centre */
-    left: auto;  /* ← CHANGEMENT : annule le centrage */
-    transform: none; /* ← CHANGEMENT : supprime translateX */
-    z-index: 100;
-    width: 44px;
-    height: 44px;
-    border: 1px solid rgba(255, 0, 150, 0.4); /* ← CHANGEMENT : bordure rose */
-    border-radius: 50%;
-    background: rgba(10, 10, 15, 0.95);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    opacity: 0.9;
-    /* ← AJOUT : glow néon permanent subtil */
-    box-shadow: 0 0 10px rgba(255, 0, 150, 0.2), 
-                0 0 20px rgba(255, 0, 150, 0.1);
-}
-
-/* Hover + actif — néon intense */
-#audioToggle:hover,
-#audioToggle.active {
-    border-color: #FF00AA; /* ← CHANGEMENT : rose fushia pur */
-    color: #FF00AA;
-    opacity: 1;
-    /* ← AJOUT : glow néon puissant */
-    box-shadow: 0 0 15px rgba(255, 0, 170, 0.6), 
-                0 0 30px rgba(255, 0, 170, 0.4),
-                0 0 45px rgba(255, 0, 170, 0.2);
-    animation: pulse-neon 2s ease-in-out infinite;
-}
-
-/* ← AJOUT : animation pulsation néon */
-@keyframes pulse-neon {
-    0%, 100% { 
-        box-shadow: 0 0 15px rgba(255,0,170,0.6), 
-                    0 0 30px rgba(255,0,170,0.4); 
-    }
-    50% { 
-        box-shadow: 0 0 20px rgba(255,0,170,0.9), 
-                    0 0 40px rgba(255,0,170,0.6),
-                    0 0 60px rgba(255,0,170,0.3); 
-    }
-}
-
-/* Icônes — couleur néon */
-#audioToggle svg {
-    width: 18px;
-    height: 18px;
-    transition: opacity 0.2s ease, stroke 0.2s ease;
-    stroke: #FF66CC; /* ← CHANGEMENT : rose clair par défaut */
-}
-#audioToggle:hover svg,
-#audioToggle.active svg {
-    stroke: #FF00AA; /* ← CHANGEMENT : rose fushia au hover/actif */
-}
-
-/* Hint — coordonné néon */
-#audioHint {
-    position: fixed;
-    bottom: 80px;
-    right: 24px; /* ← CHANGEMENT : aligné à droite sous l'icône */
-    left: auto;
-    transform: none;
-    z-index: 99;
-    padding: 6px 14px;
-    background: rgba(26, 26, 36, 0.98);
-    border: 1px solid rgba(255, 0, 170, 0.5); /* ← CHANGEMENT : bordure rose */
-    border-radius: 18px;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: #FF66CC; /* ← CHANGEMENT : texte rose */
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    white-space: nowrap;
-    text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(255, 0, 170, 0.4); /* ← AJOUT : glow texte */
-}
-#audioHint.visible { opacity: 1; }
-</style>
-
-
-
-
-
-</head>
-<body class="bg-primary text-white font-body overflow-x-hidden selection:bg-accent selection:text-white">
-
-    <!-- Grain Overlay -->
-    <div class="fixed inset-0 pointer-events-none z-40 bg-grain opacity-60"></div>
-
-    <!-- Custom Cursor -->
-    <div id="cursor"></div>
-
-    <!-- Loader -->
-    <div id="loader">
-        <h1 class="font-title text-4xl md:text-6xl text-white mb-4 tracking-widest text-glow">LISA NOX</h1>
-        <p class="loader-text text-silver text-xs md:text-sm tracking-[0.4em]">Ce qui dort ne ment jamais.</p>
-    </div>
-
-    <!-- Particle Canvas -->
-    <canvas id="particleCanvas" class="fixed inset-0 z-0"></canvas>
-
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference">
-        <a href="#" class="font-title text-xl md:text-2xl font-bold tracking-widest hover:text-silver transition-colors cursor-hover">LISA NOX</a>
-        
-        <div class="hidden md:flex gap-8 items-center">
-            <a href="#univers" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">UNIVERS</a>
-            <a href="#musique" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">MUSIQUE</a>
-            <a href="#visuels" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">VISUELS</a>
-            <a href="#presskit" class="text-xs tracking-[0.2em] hover:text-silver transition-colors cursor-hover">PRESS KIT</a>
-            <a href="#contact" class="px-5 py-2 rounded-full border border-accent/40 text-xs tracking-[0.15em] text-silver hover:bg-accent hover:text-white hover:border-accent transition-all cursor-hover liquid-hover">CONTACT</a>
-        </div>
-
-        <!-- Mobile Menu Toggle -->
-        <button class="md:hidden flex flex-col gap-1.5 cursor-hover group" id="menuToggle">
-            <span class="block w-6 h-0.5 bg-white transition-transform duration-300 group-hover:w-8"></span>
-            <span class="block w-4 h-0.5 bg-white ml-auto transition-all duration-300 group-hover:w-8"></span>
-            <span class="block w-6 h-0.5 bg-white transition-transform duration-300 group-hover:w-8"></span>
-        </button>
-    </nav>
-
-    <!-- Mobile Menu Overlay -->
-    <div id="mobileMenu" class="fixed inset-0 z-40 bg-primary/95 backdrop-blur-md flex flex-col items-center justify-center gap-8 transform translate-x-full transition-transform duration-500 ease-in-out">
-        <a href="#univers" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">UNIVERS</a>
-        <a href="#musique" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">MUSIQUE</a>
-        <a href="#visuels" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">VISUELS</a>
-        <a href="#presskit" class="font-title text-3xl hover:text-silver cursor-hover mobile-link">PRESS KIT</a>
-        <a href="#contact" class="px-5 py-2 rounded-full border border-accent/40 text-xs tracking-[0.15em] text-silver hover:bg-accent hover:text-white hover:border-accent transition-all cursor-hover liquid-hover">CONTACT</a>        
-        <button id="closeMenu" class="absolute top-6 right-6 text-white cursor-hover">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
-    </div>
-    <!-- Main Content -->
-    <main class="relative z-10">
-        
-        <!-- Hero Section -->
-        <section class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative">
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse"></div>
-            
-            <p class="text-silver text-xs md:text-sm tracking-[0.5em] mb-4 reveal">VOIX ENTRE DEUX MONDES</p>
-            
-            <h1 class="font-title text-5xl md:text-8xl lg:text-9xl font-bold mb-6 leading-tight reveal" style="transition-delay: 0.1s;">
-                <span class="block text-white">LISA</span>
-                <span class="block text-transparent bg-clip-text bg-gradient-to-r from-accent to-silver">NOX</span>
-            </h1>
-            
-            <p class="text-sm md:text-base text-gray-400 max-w-md mx-auto mb-12 tracking-wide reveal" style="transition-delay: 0.2s;">
-                Je suis celle qui rêve.<br>
-                Chaque note est un fragment de rêve brisé.
-            </p>
-            
-            <a href="#univers" class="group relative px-8 py-3 overflow-hidden rounded-full border border-silver/30 hover:border-accent transition-colors duration-500 cursor-hover reveal" style="transition-delay: 0.3s;">
-                <span class="relative z-10 text-xs tracking-[0.3em] font-medium group-hover:text-white transition-colors">↓ ENTRER</span>
-                <div class="absolute inset-0 bg-gradient-to-r from-accent to-silver opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-md"></div>
-                <div class="absolute inset-0 bg-accent/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
-            </a>
-        </section>
-
-        <!-- Univers Section -->
-        <section id="univers" class="min-h-screen py-24 px-6 md:px-12 flex flex-col justify-center relative overflow-hidden">
-            <!-- Background Element -->
-            <div class="absolute right-0 top-1/4 w-1/3 h-1/2 bg-gradient-to-l from-secondary/50 to-transparent -z-10 blur-3xl"></div>
-
-            <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                <div class="reveal">
-                    <h2 class="font-title text-4xl md:text-5xl mb-6 text-white">ONIROPHOBIE</h2>
-                    <div class="h-0.5 w-20 bg-gradient-to-r from-accent to-silver mb-6"></div>
-                    <p class="text-gray-300 leading-relaxed mb-6 text-lg">
-                        LISA voit ce que les autres ne voient pas. Ses rêves annoncent la mort. Elle marche entre les lignes du destin, tissant des mélodies là où la réalité se fracture.
-                    </p>
-                    <p class="text-silver text-sm italic border-l-2 border-accent pl-4">
-                        "La frontière entre le sommeil et l'éternité est plus fine qu'un fil de soie."
-                    </p>
-                </div>
-                
-                <div class="relative reveal" style="transition-delay: 0.2s;">
-                    <!-- Generated Image Placeholder for Artist Avatar/Art -->
-                    <div class="aspect-[3/4] rounded-lg overflow-hidden border border-white/5 relative group cursor-hover">
-                        <img src="assets/photo_lisa-01.jpg" alt="LISA NOX Art" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent"></div>
-                        <div class="absolute bottom-6 left-6">
-                            <p class="font-title text-xl text-white">Cycle 01</p>
-                            <p class="text-xs text-silver tracking-widest">SOMMEIL FRACTURÉ</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
- <!-- Univers Section -->
-        <section id="univers" class="py-24 md:py-32 px-6 relative">
-            <div class="max-w-6xl mx-auto">
-                <div class="flex flex-col md:flex-row gap-16 items-start">
-                    <div class="md:w-1/3 sticky top-24 reveal">
-                        <h2 class="font-title text-4xl md:text-5xl mb-4 text-white">UNIVERS</h2>
-                        <div class="h-[1px] w-16 bg-gradient-to-r from-accent to-transparent mb-6"></div>
-                        <p class="text-silver text-sm leading-relaxed italic border-l-2 border-accent pl-4">
-                            "LISA voit ce que les autres ne voient pas. Ses rêves annoncent la mort. Elle marche entre les lignes du destin."
-                        </p>
-                    </div>
-                    <div class="md:w-2/3 space-y-12">
-                        <!-- Timeline Item 1 -->
-                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.1s;">
-                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-accent ring-4 ring-primary"></div>
-                            <span class="text-xs text-accent tracking-widest mb-2 block">CYCLE 01 — SOMMEIL FRACTURÉ</span>
-                            <h3 class="font-title text-2xl mb-3 text-white">Le Premier Rêve</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                Les murs se dissolvent. La réalité cède. LISA découvre sa capacité à naviguer dans les limbes, là où les souvenirs des autres prennent forme.
-                            </p>
-                        </div>
-                        <!-- Timeline Item 2 -->
-                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.2s;">
-                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-secondary ring-4 ring-primary border border-accent/50"></div>
-                            <span class="text-xs text-silver tracking-widest mb-2 block">CYCLE 02 — ONIROPHOBIE</span>
-                            <h3 class="font-title text-2xl mb-3 text-white">La Peur de Dormir</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                Chaque nuit apporte une vision. Chaque vision est un avertissement. La frontière s'amincit. La musique devient le seul fil qui la retient.
-                            </p>
-                        </div>
-                        <!-- Timeline Item 3 -->
-                        <div class="relative pl-8 border-l border-white/10 reveal" style="transition-delay: 0.3s;">
-                            <div class="absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full bg-transparent ring-4 ring-primary border border-white/20"></div>
-                            <span class="text-xs text-gray-500 tracking-widest mb-2 block">CYCLE 03 — EN COURS</span>
-                            <h3 class="font-title text-2xl mb-3 text-white">L'Écho Final</h3>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                À venir. Ce cycle explorera la convergence des mondes. Les fragments s'assemblent. La vérité onirique se révèle.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        
-        <!-- Musique Section -->
-        <section id="musique" class="py-24 px-6 bg-secondary/30 border-y border-white/5 relative">
-            <div class="max-w-5xl mx-auto">
-                <h2 class="font-title text-3xl md:text-4xl text-center mb-16 reveal">MUSIQUE</h2>
-                <p class="text-sm text-gray-400 max-w-md mx-auto text-center">Extraits sonores des cycles. Intégration native à venir.</p>
-                <br><br>
-                <iframe 
-                    src="https://youtu.be/dnDUHVQ5JMA?si=X-PPx-FrpFCagJeC"
-                    loading="lazy"
-                    title="LISA NOX - [Titre Clip]"
-                    class="video-embed dp-dark-theme"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
-                <br><br>
-<div class="section" id="music">
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/dnDUHVQ5JMA?si=DExHfKQ-bgMc8f_3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-
-
-<br><br>
-
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <!-- Track Card -->
-                    <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/3x7KtJgZA58ikpWwiFW67U?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    <!-- Track Card -->
-                    <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/05NobfdAPn7Xn8PZIWF58x?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    <!-- Track Card -->
-                     <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/album/10UuuuduvB6k3Rvw5vlTjV?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                </div>     
-        <div class="text-center mt-12 reveal">
-                    <a href="https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA" target="_blank" class="inline-flex items-center gap-2 text-xs tracking-[0.2em] text-silver hover:text-white transition-colors cursor-hover border-b border-silver/30 hover:border-white pb-1">
-                        Écouter sur Spotify
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                    <br><br>
-                    <a href="https://music.apple.com/us/artist/lisa-nox/1890800102" target="_blank" class="inline-flex items-center gap-2 text-xs tracking-[0.2em] text-silver hover:text-white transition-colors cursor-hover border-b border-silver/30 hover:border-white pb-1">
-                        Écouter sur Apple music
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
-            </div>
-        </section>
- <!-- Visuels Section -->
-        <section id="visuels" class="py-24 px-6">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex flex-col md:flex-row justify-between items-end mb-12 reveal">
-                    <div>
-                        <h2 class="font-title text-4xl md:text-5xl text-white mb-4">VISUELS / COVERS</h2>
-                        <p class="text-sm text-gray-400 max-w-md">Fenêtres sur l'invisible. Générés, sélectionnés, révélés.</p>
-                    </div>
-                    <div class="flex gap-3 mt-6 md:mt-0">
-                        <button class="filter-btn active text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-accent bg-accent/20 text-white cursor-hover transition-all" data-filter="all">TOUS</button>
-                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="lucide">RÊVE LUCIDE</button>
-                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="cauchemar">CAUCHEMAR</button>
-                        <button class="filter-btn text-[10px] tracking-[0.2em] px-3 py-1.5 rounded-full border border-white/10 hover:border-silver text-gray-400 cursor-hover transition-all" data-filter="limbes">LIMBES</button>
-                    </div>
-                </div>
-
-                <div class="masonry-grid" id="galleryGrid">
-                    <!-- Item 1 -->
-                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="lucide">
-                        <img src="assets/reve-02.jpg" alt="Rêve Lucide 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                            <p class="text-white font-title text-sm">Éther Cristallin</p>
-                            <p class="text-[10px] text-gray-400 mt-1">Midjourney v6 • Prompt: floating crystals</p>
-                        </div>
-                    </div>
-                    <!-- Item 2 -->
-                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="cauchemar" style="transition-delay: 0.1s;">
-                        <img src="assets/cauchemar-01.jpg" alt="Cauchemar 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                            <p class="text-white font-title text-sm">Ombre Déformée</p>
-                            <p class="text-[10px] text-gray-400 mt-1">Stable Diffusion XL • Model: Nightmare</p>
-                        </div>
-                    </div>
-                    <!-- Item 3 -->
-                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="limbes" style="transition-delay: 0.2s;">
-                        <img src="assets/limbes.jpg" alt="Limbes 1" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                            <p class="text-white font-title text-sm">Zone Nulle</p>
-                            <p class="text-[10px] text-gray-400 mt-1">DALL-E 3 • Prompt: ethereal void</p>
-                        </div>
-                    </div>
-                    <!-- Item 4 -->
-                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="lucide" style="transition-delay: 0.15s;">
-                        <img src="assets/reve-01.jpg" alt="Rêve Lucide 2" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                            <p class="text-white font-title text-sm">Convergence</p>
-                            <p class="text-[10px] text-gray-400 mt-1">Midjourney v6 • Prompt: geometric shapes</p>
-                        </div>
-                    </div>
-                    <!-- Item 5 -->
-                    <div class="masonry-item relative group overflow-hidden rounded-lg cursor-hover reveal" data-category="cauchemar" style="transition-delay: 0.25s;">
-                        <img src="assets/cauchemar-02.jpg" alt="Cauchemar 2" class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                            <p class="text-white font-title text-sm">Miroir Fracturé</p>
-                            <p class="text-[10px] text-gray-400 mt-1">Flux • Prompt: broken mirror</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Press Kit Section -->
-        <section id="presskit" class="py-24 px-6 bg-secondary/30 border-y border-white/5">
-            <div class="max-w-3xl mx-auto text-center reveal">
-                <h2 class="font-title text-3xl md:text-4xl text-white mb-6">PRESS KIT</h2>
-                <p class="text-gray-400 text-sm mb-8 max-w-xl mx-auto">
-                    Accès médias. Contient biographie officielle, visuels HD (3000px), logos vectoriels, contacts presse et liens streaming.
-                </p>
-                <a href="#" class="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-accent/20 to-transparent border border-accent/40 hover:border-accent hover:bg-accent/30 transition-all rounded-lg cursor-hover group">
-                    <svg class="w-5 h-5 text-silver group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span class="text-xs tracking-[0.2em] font-medium text-silver group-hover:text-white transition-colors">TÉLÉCHARGER (PDF)</span>
-                </a>
-                <p class="text-[10px] text-gray-600 mt-4 tracking-wider">Fichier: LISANOX_PressKit_2026.pdf • Mise à jour: Mai 2026</p>
-            </div>
-        </section>
-
-        <!-- Contact / Newsletter Section -->
-        <section id="contact" class="py-24 px-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-accent/10 to-transparent blur-3xl -z-10"></div>
-            <div class="max-w-2xl mx-auto text-center reveal">
-                <p class="text-silver text-xs tracking-[0.4em] mb-4">REJOINDRE</p>
-                <h2 class="font-title text-3xl md:text-5xl text-white mb-6">ENTRER DANS LE CERCLE</h2>
-                <p class="text-gray-400 mb-8">Recevez en avant-première les fragments audio, les visuels exclusifs et les annonces des prochains cycles. Lead Magnet : Fond d'écran HD + Extrait 30s.</p>
-                
-                <form class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onsubmit="event.preventDefault(); alert('Merci. Vérifiez votre inbox pour la validation double opt-in.');">
-                    <input type="email" placeholder="votre.email@domaine.com" required class="flex-1 bg-primary/80 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent transition-colors">
-                    <button type="submit" class="px-6 py-3 bg-accent text-white rounded-lg text-xs tracking-widest hover:bg-silver hover:text-primary transition-all cursor-hover font-medium">
-                        VALIDER
-                    </button>
-                </form>
-                <p class="text-[10px] text-gray-600 mt-4">Double opt-in requis. Aucun spam. Désinscription en un clic. <a href="" class="underline hover:text-gray-400">Politique RGPD</a></p>
-            </div>
-        </section>
-
-
-        <!-- Support Section -->
-        <section id="support" class="min-h-[60vh] py-24 px-6 flex items-center justify-center text-center relative">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent opacity-50"></div>
-            
-            <div class="max-w-2xl mx-auto relative z-10 reveal">
-                <p class="text-silver text-xs tracking-[0.4em] mb-4">SOUTENIR</p>
-                <h2 class="font-title text-4xl md:text-5xl mb-8">REJOINDRE LE RÊVE</h2>
-                <p class="text-gray-400 mb-10">Accédez à l'interdit. Soutenez la création et découvrez les coulisses de l'Onirophobie.</p>
-                
-                <a href="https://fr.tipeee.com/onirophobie" target="_blank" class="liquid-hover inline-block px-10 py-4 bg-gradient-to-r from-accent to-silver text-primary font-bold text-sm tracking-[0.2em] rounded-full cursor-hover relative overflow-hidden group">
-                    <span class="relative z-10">SOUTENIR LISA NOX</span>
-                    <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 skew-x-12"></div>
-                </a>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="py-12 px-6 border-t border-white/5 bg-primary">
-            <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-                <div class="text-center md:text-left">
-                    <a href="#" class="font-title text-xl mb-2">LISA NOX</a>
-                    <p class="text-[10px] text-gray-600 tracking-widest">© LISA NOX — Univers dp/ DEVEN PHOBE</p>
-                </div>
-                
-                <div class="flex gap-6">
-                    
-                    <a href="https://www.instagram.com/lisanox.official" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-silver transition-colors cursor-hover" aria-label="Instagram">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
-                    </a>
-                    <a href="https://www.tiktok.com/@lisa.nox" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-silver transition-colors cursor-hover" aria-label="TikTok">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-                    </a>
-                    <a href="https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-green-500 transition-colors cursor-hover" aria-label="Spotify">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15c3-1 5-1 8 0M7 12c4-1.5 6-1.5 10 0M6 9c5-2 7-2 12 0"/></svg>
-                    </a>
-                    <a href="https://www.youtube.com/@lisanox.official" target="_blank" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors cursor-hover" aria-label="YouTube">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="currentColor"/></svg>
-                    </a>               
-                </div>
-
-                <div class="flex gap-4 text-[10px] text-gray-600 tracking-wider">
-                    <a href="" class="hover:text-gray-400 cursor-hover">MENTIONS</a>
-                    <a href="" class="hover:text-gray-400 cursor-hover">RGPD</a>
-                </div>
-            </div>
-        </footer>
-    </main>
-
-    <!-- Audio Toggle (Floating) -->
-<!-- Toggle Icon (bas centre) -->
-<button id="audioToggle" aria-label="Ambiance onirique" title="Activer/couper le son" style="
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:100;
-    width:40px; height:40px; border:1px solid rgba(255,255,255,0.12);
-    border-radius:50%; background:rgba(10,10,15,0.95);
-    display:flex; align-items:center; justify-content:center; cursor:pointer;
-    transition:all 0.25s ease; opacity:0.9;
-">
-    <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;transition:opacity 0.2s;">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-    </svg>
-    <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;opacity:0;position:absolute;transition:opacity 0.2s;">
-        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
-        <path d="M16 13a3 3 0 0 0 3-3" stroke-linecap="round"/>
-        <path d="M19 9a6 6 0 0 0 6-6" stroke-linecap="round" opacity="0.6"/>
-    </svg>
-</button>
-
-<!-- Audio Element -->
-<audio id="ambientAudio" loop preload="auto" playsinline>
-    <source src="assets/audio/ambiance-onirique.mp3" type="audio/mpeg">
-</audio>
-
-<!-- Script Ultra-Simple : Activation immédiate -->
-<script>
-(function() {
-    const audio = document.getElementById('ambientAudio');
-    const toggle = document.getElementById('audioToggle');
-    const iconOff = toggle.querySelector('.icon-off');
-    const iconOn = toggle.querySelector('.icon-on');
-    
-    audio.volume = 0.35; // -24 LUFS specs dp
-    let isPlaying = false;
-    let activated = false;
-
-    // Fonction d'activation audio + UI
-    const playAudio = async () => {
-        if (activated) return;
-        activated = true;
-        
-        try {
-            await audio.play();
-            isPlaying = true;
-            iconOff.style.opacity = '0';
-            iconOn.style.opacity = '1';
-            toggle.classList.add('active');
-            toggle.style.borderColor = '#4A3B8C';
-            toggle.style.boxShadow = '0 0 25px rgba(74,59,140,0.35)';
-        } catch (e) {
-            console.log('Audio blocked, waiting for next gesture');
-            activated = false; // Réessayer au prochain geste
-        }
-    };
-
-    // TOUS les événements possibles — sans filtre, sans condition
-    const events = [
-        'click','mousedown','mouseup','touchstart','touchend',
-        'keydown','keyup','wheel','scroll','mousemove','touchmove',
-        'focus','blur','resize','orientationchange'
-    ];
-
-    // Handler unique : joue + nettoie TOUT
-    const trigger = (e) => {
-        playAudio();
-        // Supprime TOUS les listeners après première tentative
-        events.forEach(evt => {
-            window.removeEventListener(evt, trigger, true);
-            window.removeEventListener(evt, trigger, false);
-            document.removeEventListener(evt, trigger, true);
-            document.removeEventListener(evt, trigger, false);
-        });
-    };
-
-    // Ajoute les listeners sur window ET document, capture ET bubble
-    events.forEach(evt => {
-        window.addEventListener(evt, trigger, true);
-        window.addEventListener(evt, trigger, false);
-        document.addEventListener(evt, trigger, true);
-        document.addEventListener(evt, trigger, false);
-    });
-
-    // Toggle manuel (mute/unmute) — toujours fonctionnel
-    toggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (isPlaying) {
-            audio.pause();
-            isPlaying = false;
-            iconOff.style.opacity = '1';
-            iconOn.style.opacity = '0';
-            toggle.style.borderColor = 'rgba(255,255,255,0.12)';
-            toggle.style.boxShadow = 'none';
-        } else {
-            audio.play().then(() => {
-                isPlaying = true;
-                iconOff.style.opacity = '0';
-                iconOn.style.opacity = '1';
-                toggle.style.borderColor = '#4A3B8C';
-                toggle.style.boxShadow = '0 0 25px rgba(74,59,140,0.35)';
-            }).catch(() => {});
-        }
-    });
-
-    // Pause si onglet inactif
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden && isPlaying) audio.pause();
-        else if (!document.hidden && isPlaying) audio.play().catch(()=>{});
-    });
-})();
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LISA NOX — ONIROPHOBIE ◈ Ce qui dort ne ment jamais</title>
+<meta name="description" content="LISA NOX — Voix entre deux mondes. ONIROPHOBIE : cycles oniriques, clips des singles, fragments audio, visuels générés. Ce qui dort ne ment jamais.">
+<meta name="theme-color" content="#0A0A0F">
+<meta property="og:title" content="LISA NOX — ONIROPHOBIE">
+<meta property="og:description" content="Je suis celle qui rêve. Chaque note est un fragment de rêve brisé.">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MusicGroup","name":"LISA NOX","description":"Artiste virtuelle — ONIROPHOBIE. Ce qui dort ne ment jamais.","genre":["Dark Ambient","Electronic","Cinematic"],"url":"https://lisanox.com","sameAs":["https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA","https://music.apple.com/us/artist/lisa-nox/1890800102","https://fr.tipeee.com/onirophobie"]}
 </script>
+ <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/fontsource/css/cinzel@latest/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/cinzel@latest/700.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/cinzel@latest/900.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/300.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/500.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/fontsource/css/jetbrains-mono@latest/400.css" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%230A0A0F'/><text x='32' y='44' font-size='34' text-anchor='middle' fill='%234A3B8C' font-family='serif'>XIII</text></svg>">
+<style>
+:root{
+  --noir:#0A0A0F; --anthra:#12121C; --anthra2:#1A1A24;
+  --indigo:#4A3B8C; --argent:#8899B3;
+  --voile:rgba(255,255,255,.88); --faible:rgba(255,255,255,.58); --tf:rgba(255,255,255,.32);
+  --disp:'Cinzel',serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+  --e:cubic-bezier(.22,.61,.36,1); --liq:cubic-bezier(.34,1.56,.64,1);
+  --pad:clamp(1.25rem,5vw,5rem);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{background:var(--noir);color:var(--voile);font-family:var(--body);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+body.fine, body.fine a, body.fine button, body.fine input{cursor:none!important}
+::selection{background:var(--indigo);color:#fff}
+::-webkit-scrollbar{width:9px}
+::-webkit-scrollbar-track{background:var(--noir)}
+::-webkit-scrollbar-thumb{background:var(--anthra2);border-radius:9px;border:2px solid var(--noir)}
+::-webkit-scrollbar-thumb:hover{background:var(--indigo)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font-family:inherit;background:none;border:none;color:inherit}
+:focus-visible{outline:1px solid var(--argent);outline-offset:4px;border-radius:2px}
 
+/* ---------- GRAIN ---------- */
+#grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.09;mix-blend-mode:overlay;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grainShift 1.2s steps(4) infinite}
+@keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-2%,3%)}50%{transform:translate(3%,-2%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(2%,2%)}}
 
+/* ---------- SHADER BG ---------- */
+#dreamGL{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body.nogl #dreamGL{display:none}
+body.nogl{background:radial-gradient(1100px 700px at 72% 12%,#15152b 0%,var(--noir) 65%)}
 
+/* ---------- CURSEUR LUCIOLE ---------- */
+#curDot,#curRing{position:fixed;left:0;top:0;z-index:9000;pointer-events:none;border-radius:50%;mix-blend-mode:screen}
+#curDot{width:6px;height:6px;background:#cfd8ea;box-shadow:0 0 12px var(--indigo),0 0 30px var(--indigo)}
+#curRing{width:34px;height:34px;border:1px solid rgba(136,153,179,.55);transition:width .35s var(--e),height .35s var(--e),border-color .35s}
+#curRing.big{width:64px;height:64px;border-color:var(--indigo)}
+body:not(.fine) #curDot,body:not(.fine) #curRing{display:none}
 
+/* ---------- LOADER ---------- */
+#loader{position:fixed;inset:0;z-index:9500;background:var(--noir);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2rem;transition:opacity .8s var(--e),visibility .8s}
+#loader.gone{opacity:0;visibility:hidden}
+.eye{width:132px;height:66px;position:relative;overflow:hidden}
+.eye .lid{position:absolute;inset:0;border:1.5px solid var(--argent);border-radius:50%;transform:scaleY(.04);animation:lidOpen 1.4s var(--e) .15s forwards}
+.eye .pup{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle,#cfd8ea 0%,var(--indigo) 60%);box-shadow:0 0 24px var(--indigo);transform:scale(0);animation:pup 1.4s var(--liq) .8s forwards}
+@keyframes lidOpen{to{transform:scaleY(1)}}
+@keyframes pup{to{transform:scale(1)}}
+#loaderText{font-family:var(--disp);font-size:clamp(.7rem,2vw,.95rem);letter-spacing:.42em;color:var(--faible);display:flex}
+#loaderText span{opacity:0;transform:translateY(10px);animation:lt .5s var(--e) forwards}
+@keyframes lt{to{opacity:1;transform:none}}
 
+/* ---------- NAV ---------- */
+#nav{position:fixed;top:0;left:0;right:0;z-index:800;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem var(--pad);transition:background .5s var(--e),backdrop-filter .5s,border-color .5s;border-bottom:1px solid transparent}
+#nav.solid{background:rgba(10,10,15,.72);backdrop-filter:blur(14px);border-color:rgba(74,59,140,.22)}
+.brand{font-family:var(--disp);font-weight:700;letter-spacing:.28em;font-size:1rem;position:relative}
+.brand em{font-style:normal;color:var(--indigo)}
+.navlinks{display:flex;gap:2rem;list-style:none}
+.navlinks a{font-size:.72rem;letter-spacing:.22em;color:var(--faible);position:relative;padding:.4rem 0;transition:color .3s}
+.navlinks a::after{content:'';position:absolute;left:50%;top:-9px;width:3px;height:3px;border-radius:50%;background:var(--argent);box-shadow:0 0 8px var(--argent),0 0 16px var(--indigo);opacity:0;transform:translateX(-50%) scale(.4);transition:.35s var(--liq)}
+.navlinks a:hover,.navlinks a.on{color:var(--voile)}
+.navlinks a:hover::after,.navlinks a.on::after{opacity:1;transform:translateX(-50%) scale(1)}
+#clock{font-family:var(--mono);font-size:.72rem;letter-spacing:.18em;color:var(--tf);border:1px solid rgba(136,153,179,.18);padding:.35rem .7rem;border-radius:99px;transition:.3s;user-select:none}
+#clock:hover{color:var(--argent);border-color:var(--indigo)}
+#clock.glitch{color:var(--indigo);border-color:var(--indigo);animation:clk .13s steps(2) infinite;text-shadow:2px 0 rgba(136,153,179,.8),-2px 0 rgba(74,59,140,.9)}
+@keyframes clk{50%{transform:translateX(1.5px) skewX(2deg)}}
+#burger{display:none;width:40px;height:40px;position:relative;z-index:860}
+#burger i{position:absolute;left:9px;right:9px;height:1.5px;background:var(--argent);transition:.4s var(--e)}
+#burger i:first-child{top:15px}#burger i:last-child{bottom:15px}
+body.menu #burger i:first-child{top:19px;transform:rotate(45deg)}
+body.menu #burger i:last-child{bottom:19px;transform:rotate(-45deg)}
+#mmenu{position:fixed;inset:0;z-index:850;background:rgba(10,10,15,.96);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;clip-path:circle(0% at 92% 6%);transition:clip-path .8s var(--e)}
+body.menu #mmenu{clip-path:circle(140% at 92% 6%)}
+#mmenu a{font-family:var(--disp);font-size:1.5rem;letter-spacing:.3em;color:var(--faible);opacity:0;transform:translateY(24px) rotate(-4deg);transition:.6s var(--e)}
+body.menu #mmenu a{opacity:1;transform:none}
+#mmenu a:nth-child(1){transition-delay:.15s}#mmenu a:nth-child(2){transition-delay:.22s}#mmenu a:nth-child(3){transition-delay:.29s}#mmenu a:nth-child(4){transition-delay:.36s}#mmenu a:nth-child(5){transition-delay:.43s}#mmenu a:nth-child(6){transition-delay:.5s}
 
+/* ---------- RAIL PROFONDEUR ---------- */
+#rail{position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:700;display:flex;flex-direction:column;align-items:center;gap:.8rem;pointer-events:none}
+#rail .line{width:1px;height:34vh;background:linear-gradient(var(--tf),var(--indigo),var(--tf));position:relative}
+#rail .mark{position:absolute;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--argent);box-shadow:0 0 12px var(--indigo);top:0}
+#railLbl{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--tf);writing-mode:vertical-rl}
 
+/* ---------- STRUCTURE ---------- */
+main{position:relative;z-index:2}
+section{padding:clamp(6rem,14vh,10rem) var(--pad);position:relative}
+.kicker{font-family:var(--mono);font-size:.66rem;letter-spacing:.4em;color:var(--indigo);text-transform:uppercase;margin-bottom:1.4rem;display:flex;align-items:center;gap:.9rem}
+.kicker::before{content:'';width:34px;height:1px;background:var(--indigo)}
+h2{font-family:var(--disp);font-weight:700;font-size:clamp(1.9rem,4.6vw,3.4rem);letter-spacing:.14em;line-height:1.15;text-wrap:balance}
+.lead{color:var(--faible);max-width:62ch;margin-top:1.6rem;font-size:clamp(.95rem,1.4vw,1.08rem)}
+[data-reveal]{opacity:0;transform:translateY(46px);filter:blur(6px);transition:opacity 1s var(--e),transform 1s var(--e),filter 1s var(--e);transition-delay:var(--d,0s)}
+[data-reveal].in{opacity:1;transform:none;filter:none}
 
+/* ---------- HERO ---------- */
+#hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-top:16vh}
+#heroTitle{font-family:var(--disp);font-weight:900;font-size:clamp(3.2rem,13vw,10.5rem);line-height:.95;letter-spacing:.06em;margin:.6rem 0 1.4rem}
+#heroTitle .ltr{display:inline-block;opacity:0;transform:translateY(.6em) rotate(7deg);filter:blur(10px);transition:opacity .9s var(--e) var(--d),transform .9s var(--e) var(--d),filter .9s var(--e) var(--d)}
+body.awake #heroTitle .ltr{opacity:1;transform:none;filter:none}
+body.awake #heroTitle{animation:breathe 7s ease-in-out 3.4s infinite}
+@keyframes breathe{0%,100%{letter-spacing:.06em}50%{letter-spacing:.11em}}
+#heroTitle .sp{width:.4em}
+.heroSub{max-width:44ch;color:var(--faible);font-size:clamp(1rem,1.6vw,1.2rem)}
+.heroSub strong{color:var(--voile);font-weight:400}
+.ctaRow{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:2.8rem;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:.8rem;padding:1.05rem 2.4rem;border-radius:99px;font-family:var(--disp);font-size:.8rem;letter-spacing:.26em;border:1px solid rgba(136,153,179,.35);position:relative;overflow:hidden;transition:transform .4s var(--liq),border-color .4s,box-shadow .4s}
+.btn.solid{background:linear-gradient(120deg,var(--indigo),#6a5bb8 55%,var(--argent));border-color:transparent;box-shadow:0 12px 44px rgba(74,59,140,.35)}
+.btn::before{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-110%);transition:transform .7s var(--e)}
+.btn:hover{transform:translateY(-4px);border-color:var(--indigo);box-shadow:0 18px 60px rgba(74,59,140,.5)}
+.btn:hover::before{transform:translateX(110%)}
+.btn.liquid:hover{filter:url(#liquid)}
+.scrollHint{position:absolute;bottom:3rem;left:var(--pad);display:flex;align-items:center;gap:1rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.34em;color:var(--tf)}
+.scrollHint .tube{width:1px;height:56px;background:rgba(136,153,179,.25);position:relative;overflow:hidden}
+.scrollHint .tube::after{content:'';position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--argent);animation:drip 2.2s var(--e) infinite}
+@keyframes drip{to{top:110%}}
 
-    <script>
-        // Loader Logic
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loader').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }, 2500);
-        });
+/* ---------- UNIVERS ---------- */
+#univers{position:relative}
+.xiii{position:absolute;top:4%;right:-6%;z-index:-1;font-family:var(--disp);font-weight:900;font-size:clamp(18rem,44vw,46rem);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(136,153,179,.08);pointer-events:none;user-select:none;animation:slowspin 240s linear infinite}
+@keyframes slowspin{to{transform:rotate(360deg)}}
+blockquote{margin-top:3.4rem;padding-left:2rem;border-left:1px solid var(--indigo);font-size:clamp(1.2rem,2.6vw,1.9rem);font-weight:300;color:var(--argent);max-width:34ch;line-height:1.5}
+blockquote footer{margin-top:1rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.3em;color:var(--tf)}
+.cycles{margin-top:6rem;display:flex;flex-direction:column;gap:2rem;padding-bottom:8vh}
+.cycle{position:sticky;top:calc(88px + var(--i)*16px);background:linear-gradient(160deg,var(--anthra) 0%,#0e0e16 100%);border:1px solid rgba(74,59,140,.28);border-radius:22px;padding:clamp(1.8rem,4vw,3.4rem);display:grid;grid-template-columns:auto 1fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:start;box-shadow:0 -18px 60px rgba(0,0,0,.55)}
+.cycle .num{font-family:var(--disp);font-weight:900;font-size:clamp(3rem,7vw,6rem);line-height:1;color:transparent;-webkit-text-stroke:1px var(--indigo)}
+.cycle .tag{font-family:var(--mono);font-size:.62rem;letter-spacing:.3em;color:var(--indigo);margin-bottom:.9rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.chip{border:1px solid rgba(136,153,179,.3);color:var(--argent);padding:.15rem .6rem;border-radius:99px}
+.chip.live{border-color:var(--indigo);color:#cfd8ea;box-shadow:0 0 14px rgba(74,59,140,.5)}
+.cycle h3{font-family:var(--disp);font-size:clamp(1.3rem,2.6vw,2rem);letter-spacing:.1em;margin-bottom:.4rem}
+.cycle .sub{color:var(--argent);font-size:.9rem;margin-bottom:1rem;font-weight:400}
+.cycle p{color:var(--faible);max-width:56ch}
 
-        // Scroll Reveal Logic
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, { threshold: 0.15 });
+/* ---------- MARQUEE ---------- */
+.marquee{overflow:hidden;border-top:1px solid rgba(74,59,140,.25);border-bottom:1px solid rgba(74,59,140,.25);padding:1.1rem 0;position:relative;z-index:2;background:rgba(18,18,28,.5);backdrop-filter:blur(6px)}
+.mqTrack{display:flex;width:max-content;animation:mq 46s linear infinite}
+.mqTrack span{font-family:var(--disp);font-size:.85rem;letter-spacing:.42em;color:var(--tf);padding-right:2rem;white-space:nowrap}
+.mqTrack b{color:var(--indigo);font-weight:400}
+@keyframes mq{to{transform:translateX(-50%)}}
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+/* ---------- MUSIQUE ---------- */
+.playerWrap{margin-top:3.5rem;display:grid;grid-template-columns:1.15fr .85fr;gap:2rem;align-items:stretch}
+.frame{border:1px solid rgba(74,59,140,.3);border-radius:20px;overflow:hidden;background:var(--anthra);position:relative}
+.frame iframe{width:100%;height:100%;min-height:232px;border:0;display:block}
+.vizBox{border:1px solid rgba(74,59,140,.3);border-radius:20px;background:var(--anthra);padding:1.4rem;display:flex;flex-direction:column;gap:1rem}
+.vizBox .vh{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;letter-spacing:.26em;color:var(--tf)}
+#viz{width:100%;flex:1;min-height:120px;display:block}
+.linkRow{display:flex;gap:1rem;flex-wrap:wrap;margin-top:2.2rem}
+.slink{padding:.85rem 1.8rem;border-radius:99px;border:1px solid rgba(136,153,179,.3);font-family:var(--mono);font-size:.66rem;letter-spacing:.22em;color:var(--faible);transition:.35s var(--liq)}
+.slink:hover{color:var(--voile);border-color:var(--indigo);transform:translateY(-3px);box-shadow:0 10px 30px rgba(74,59,140,.35)}
+.slink.primary{background:linear-gradient(120deg,var(--indigo),var(--argent));border-color:transparent;color:#fff}
 
-        // Custom Cursor Logic
-        const cursor = document.getElementById('cursor');
-        const cursorHoverElements = document.querySelectorAll('.cursor-hover');
+/* ---------- CLIPS / LECTEUR VIDÉO ---------- */
+.clipsGrid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);gap:1.6rem;margin-top:3.2rem;align-items:start}
+.playerFrame{position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(74,59,140,.4);background:#05050a;aspect-ratio:16/9;box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 70px rgba(74,59,140,.18)}
+.cnr{position:absolute;width:26px;height:26px;z-index:6;pointer-events:none;border:1.5px solid rgba(136,153,179,.65)}
+.cnr.tl{top:12px;left:12px;border-right:0;border-bottom:0}
+.cnr.tr{top:12px;right:12px;border-left:0;border-bottom:0}
+.cnr.bl{bottom:12px;left:12px;border-right:0;border-top:0}
+.cnr.br{bottom:12px;right:12px;border-left:0;border-top:0}
+.scan{position:absolute;inset:0;z-index:5;pointer-events:none;mix-blend-mode:overlay;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);animation:scan 9s linear infinite}
+@keyframes scan{to{background-position:0 120px}}
+.pbadgeWrap{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;justify-content:space-between;padding:16px 48px;pointer-events:none;font-family:var(--mono);font-size:.56rem;letter-spacing:.24em;color:var(--argent);text-shadow:0 0 12px rgba(0,0,0,.9)}
+.pbadgeWrap .grp{display:flex;gap:.7rem;align-items:center}
+.pbadgeWrap .rec{width:7px;height:7px;border-radius:50%;background:var(--indigo);box-shadow:0 0 10px var(--indigo);animation:rec 1.3s ease-in-out infinite}
+@keyframes rec{50%{opacity:.25}}
+#playerStage{position:absolute;inset:0;transition:opacity .3s var(--e),transform .3s var(--e),filter .3s var(--e)}
+#playerStage.sw{opacity:0;transform:scale(.985);filter:blur(8px)}
+#playerStage iframe,#playerStage video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.idle{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;text-align:center;padding:2rem;background:radial-gradient(640px 320px at 50% 62%,rgba(74,59,140,.2),transparent),#07070c}
+.idle .zzz{font-family:var(--disp);font-size:clamp(1rem,2.4vw,1.6rem);letter-spacing:.5em;color:var(--faible);animation:zzz 3.4s ease-in-out infinite}
+@keyframes zzz{50%{opacity:.35;letter-spacing:.62em}}
+.idle p{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--tf);max-width:44ch}
+.clipTitle{margin-top:1.2rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:baseline}
+.clipTitle b{font-family:var(--disp);font-size:clamp(1rem,2vw,1.35rem);letter-spacing:.14em}
+.clipTitle i{font-style:normal;font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;color:var(--tf)}
+.playlist{display:flex;flex-direction:column;gap:.8rem;max-height:560px;overflow-y:auto;padding-right:.4rem}
+.plistHead{display:flex;justify-content:space-between;align-items:center;gap:.6rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.24em;color:var(--tf);margin-bottom:.2rem;flex-wrap:wrap}
+.plistHead button{font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;color:var(--faible);border:1px solid rgba(136,153,179,.25);border-radius:99px;padding:.35rem .8rem;transition:.3s}
+.plistHead button:hover,.plistHead button.on{color:#fff;border-color:var(--indigo);box-shadow:0 0 16px rgba(74,59,140,.4)}
+.srcLegend{font-family:var(--mono);font-size:.54rem;letter-spacing:.18em;color:var(--tf);margin-bottom:.4rem;display:flex;gap:1rem;flex-wrap:wrap}
+.srcLegend b{font-weight:400;color:var(--argent)}
+.clip{display:grid;grid-template-columns:auto 84px 1fr auto;align-items:center;gap:.9rem;padding:.7rem;border:1px solid rgba(136,153,179,.16);border-radius:14px;background:rgba(18,18,28,.72);transition:.3s var(--e);position:relative}
+.clip:hover{border-color:var(--indigo);transform:translateX(6px)}
+.clip.on{border-color:var(--indigo);box-shadow:0 0 30px rgba(74,59,140,.35);background:linear-gradient(120deg,rgba(74,59,140,.28),rgba(18,18,28,.85))}
+.clip .cidx{font-family:var(--mono);font-size:.62rem;color:var(--tf)}
+.clip.on .cidx{color:var(--argent);text-shadow:0 0 10px var(--indigo)}
+.cthumb{width:84px;height:50px;object-fit:cover;border-radius:8px;filter:saturate(.85) brightness(.85)}
+.clip.sleep .cthumb{filter:grayscale(.65) brightness(.45)}
+.clip.sleep{opacity:.75}
+.cinfo b{display:block;font-family:var(--disp);font-size:.8rem;letter-spacing:.1em;line-height:1.35}
+.cinfo i{font-style:normal;font-family:var(--mono);font-size:.54rem;letter-spacing:.18em;color:var(--tf)}
+.cinfo i u{text-decoration:none;color:var(--indigo)}
+.cacts{display:none;gap:.4rem}
+body.editmode .cacts{display:flex}
+.cacts button{width:27px;height:27px;border-radius:8px;border:1px solid rgba(136,153,179,.3);font-size:.68rem;color:var(--faible);transition:.25s;line-height:1}
+.cacts button:hover{border-color:var(--indigo);color:#fff;box-shadow:0 0 12px rgba(74,59,140,.5)}
+.addbar{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.8rem}
+.addbar input{flex:1;min-width:200px;background:var(--noir);border:1px solid rgba(136,153,179,.25);border-radius:99px;padding:.95rem 1.5rem;color:var(--voile);font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;transition:border-color .3s,box-shadow .3s}
+.addbar input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(74,59,140,.22)}
+.addbar input.pulse{animation:pulse 1s var(--e) 2;border-color:var(--indigo)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(74,59,140,.25)}}
+.hint{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;color:var(--tf);margin-top:1rem;line-height:2.1}
+.hint b{color:var(--argent);font-weight:400}
+.hint button{font-family:var(--mono);font-size:.56rem;letter-spacing:.16em;color:var(--faible);border-bottom:1px dotted rgba(136,153,179,.4);transition:.3s}
+.hint button:hover{color:var(--indigo)}
 
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-        });
+/* ---------- VISUELS ---------- */
+.filters{display:flex;gap:.7rem;flex-wrap:wrap;margin:2.6rem 0 2.4rem}
+.fbtn{font-family:var(--mono);font-size:.64rem;letter-spacing:.26em;padding:.6rem 1.3rem;border-radius:99px;border:1px solid rgba(136,153,179,.25);color:var(--faible);transition:.3s var(--liq)}
+.fbtn:hover{border-color:var(--indigo);color:var(--voile)}
+.fbtn.on{background:var(--indigo);border-color:var(--indigo);color:#fff;box-shadow:0 0 24px rgba(74,59,140,.5)}
+.vgrid{columns:3;column-gap:1.6rem}
+.vitem{break-inside:avoid;margin-bottom:1.6rem;position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(74,59,140,.22);background:var(--anthra)}
+.vitem.off{display:none}
+.vitem.pop{animation:pop .7s var(--e)}
+@keyframes pop{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+.vitem img{width:100%;filter:brightness(.82) saturate(.92) contrast(1.06);transition:transform 1.1s var(--e),filter .8s var(--e)}
+.vitem:hover img{transform:scale(1.07);filter:brightness(1.02) saturate(1.05)}
+.vitem figcaption{position:absolute;inset:auto 0 0 0;padding:1.6rem 1.3rem 1.2rem;background:linear-gradient(to top,rgba(10,10,15,.96),rgba(10,10,15,.55) 60%,transparent);transform:translateY(12px);opacity:0;transition:.5s var(--e)}
+.vitem:hover figcaption{transform:none;opacity:1}
+.vitem h4{font-family:var(--disp);font-size:1rem;letter-spacing:.12em;margin-bottom:.35rem}
+.vitem .meta{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;color:var(--tf)}
+.vitem .cat{position:absolute;top:12px;left:12px;font-family:var(--mono);font-size:.54rem;letter-spacing:.24em;padding:.3rem .7rem;border-radius:99px;background:rgba(10,10,15,.65);border:1px solid rgba(74,59,140,.5);color:var(--argent);backdrop-filter:blur(6px)}
 
-        cursorHoverElements.forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
-        });
+/* ---------- PRESS KIT / CONTACT ---------- */
+.card{background:var(--anthra);border:1px solid rgba(74,59,140,.28);border-radius:22px;padding:clamp(1.8rem,4vw,3rem)}
+.pkRow{display:flex;justify-content:space-between;gap:2rem;align-items:center;flex-wrap:wrap}
+.pkMeta{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;color:var(--tf);margin-top:1.4rem}
+.duo{display:grid;grid-template-columns:1.15fr .85fr;gap:2rem;margin-top:3.2rem}
+.field{display:flex;gap:.8rem;margin-top:1.8rem;flex-wrap:wrap}
+.field input{flex:1;min-width:200px;background:var(--noir);border:1px solid rgba(136,153,179,.25);border-radius:99px;padding:.95rem 1.5rem;color:var(--voile);font-family:var(--body);font-size:.9rem;transition:border-color .3s}
+.field input:focus{outline:none;border-color:var(--indigo);box-shadow:0 0 0 3px rgba(74,59,140,.2)}
+.legal{margin-top:1.2rem;font-size:.68rem;color:var(--tf)}
+.okMsg{font-family:var(--disp);letter-spacing:.14em;color:var(--argent);margin-top:1.6rem}
 
-        // Mobile Menu
-        const menuToggle = document.getElementById('menuToggle');
-        const closeMenu = document.getElementById('closeMenu');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
+/* ---------- FOOTER ---------- */
+footer{position:relative;z-index:2;border-top:1px solid rgba(74,59,140,.25);background:rgba(18,18,28,.7);backdrop-filter:blur(8px);padding:3.4rem var(--pad) 2.2rem}
+.fRow{display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap}
+.fLinks{display:flex;gap:2rem;list-style:none;font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;color:var(--tf)}
+.fLinks a:hover{color:var(--argent)}
+.xiiiSm{font-family:var(--disp);color:var(--indigo);letter-spacing:.4em;font-size:.8rem}
+.copy{margin-top:2.4rem;padding-top:1.6rem;border-top:1px solid rgba(74,59,140,.15);text-align:center;font-family:var(--mono);font-size:.6rem;letter-spacing:.24em;color:var(--tf)}
 
-        menuToggle.addEventListener('click', () => mobileMenu.classList.remove('translate-x-full'));
-        closeMenu.addEventListener('click', () => mobileMenu.classList.add('translate-x-full'));
-        mobileLinks.forEach(link => link.addEventListener('click', () => mobileMenu.classList.add('translate-x-full')));
+/* ---------- DOCK SON + TOAST ---------- */
+#soundDock{position:fixed;right:22px;bottom:22px;z-index:820;display:flex;align-items:center;gap:.8rem}
+#soundBtn{width:54px;height:54px;border-radius:50%;border:1px solid rgba(136,153,179,.4);background:rgba(10,10,15,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;gap:3px;transition:.35s var(--liq)}
+#soundBtn:hover{border-color:var(--indigo);transform:scale(1.08)}
+#soundBtn i{width:2px;height:8px;background:var(--argent);border-radius:2px;transition:.3s}
+#soundBtn.on i{background:#cfd8ea;box-shadow:0 0 8px var(--indigo);animation:eq 1s ease-in-out infinite}
+#soundBtn.on i:nth-child(2){animation-delay:.2s}#soundBtn.on i:nth-child(3){animation-delay:.4s}
+@keyframes eq{50%{height:18px}}
+#soundLbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.26em;color:var(--tf)}
+#toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,80px);z-index:9200;background:rgba(18,18,28,.92);border:1px solid var(--indigo);border-radius:99px;padding:.85rem 1.8rem;font-family:var(--mono);font-size:.64rem;letter-spacing:.22em;color:var(--voile);backdrop-filter:blur(10px);transition:transform .6s var(--liq),opacity .4s;opacity:0;pointer-events:none;max-width:88vw;text-align:center}
+#toast.show{transform:translate(-50%,0);opacity:1}
 
-        // Audio Toggle Logic (Simulation)
-        const audioToggle = document.getElementById('audioToggle');
-        const iconSound = document.getElementById('icon-sound');
-        const iconMute = document.getElementById('icon-mute');
-        let isAudioOn = false;
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:1100px){#rail{display:none}.playerWrap,.duo,.clipsGrid{grid-template-columns:1fr}.playlist{max-height:360px}}
+@media(max-width:900px){.navlinks{display:none}#burger{display:block}.vgrid{columns:2}.cycle{grid-template-columns:1fr}.cycle .num{font-size:2.6rem}#clock{display:none}}
+@media(max-width:560px){.vgrid{columns:1}.xiii{opacity:.6}.clip{grid-template-columns:auto 64px 1fr auto}.cthumb{width:64px;height:40px}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.2s!important}
+  html{scroll-behavior:auto}
+  .mqTrack,.scan,#grain{animation:none}
+}
+</style>
+</head>
+<body>
 
-        audioToggle.addEventListener('click', () => {
-            isAudioOn = !isAudioOn;
-            if (isAudioOn) {
-                iconSound.classList.remove('hidden');
-                iconMute.classList.add('hidden');
-                audioToggle.classList.add('border-accent', 'text-accent');
-                // In a real app, play audio here
-            } else {
-                iconSound.classList.add('hidden');
-                iconMute.classList.remove('hidden');
-                audioToggle.classList.remove('border-accent', 'text-accent');
-            }
-        });
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="liquid"><feTurbulence id="liqTurb" type="fractalNoise" baseFrequency="0.012 0.06" numOctaves="2" seed="13" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="14"/></filter>
+</svg>
 
-                // Filter Logic (Visuels)
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const galleryItems = document.querySelectorAll('.masonry-item');
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => { b.classList.remove('bg-accent/20', 'border-accent', 'text-white'); b.classList.add('border-white/10', 'text-gray-400'); });
-                btn.classList.remove('border-white/10', 'text-gray-400');
-                btn.classList.add('bg-accent/20', 'border-accent', 'text-white');
-                
-                const filter = btn.dataset.filter;
-                galleryItems.forEach(item => {
-                    if (filter === 'all' || item.dataset.category === filter) {
-                        item.style.display = 'block';
-                        setTimeout(() => item.style.opacity = '1', 50);
-                    } else {
-                        item.style.opacity = '0';
-                        setTimeout(() => item.style.display = 'none', 300);
-                    }
-                });
-            });
-        });
+<canvas id="dreamGL" aria-hidden="true"></canvas>
+<div id="grain" aria-hidden="true"></div>
+<div id="curDot" aria-hidden="true"></div>
+<div id="curRing" aria-hidden="true"></div>
 
-        // Particle System
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+<div id="loader" role="status" aria-label="Éveil du site">
+  <div class="eye" aria-hidden="true"><div class="lid"></div><div class="pup"></div></div>
+  <div id="loaderText" aria-label="Ce qui dort ne ment jamais"></div>
+</div>
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+<nav id="nav" aria-label="Navigation principale">
+  <a class="brand" href="#hero">LISA<em>◈</em>NOX</a>
+  <ul class="navlinks">
+    <li><a href="#univers">UNIVERS</a></li>
+    <li><a href="#musique">MUSIQUE</a></li>
+    <li><a href="#clips">CLIPS</a></li>
+    <li><a href="#visuels">VISUELS</a></li>
+    <!--<li><a href="#presskit">PRESS KIT</a></li>
+    <li><a href="#contact">CONTACT</a></li>-->
+  </ul>
+  <div style="display:flex;align-items:center;gap:1rem">
+    <button id="clock" title="Cliquer pour verrouiller 00:13" aria-label="Horloge onirique">00:13</button>
+    <button id="burger" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+  </div>
+</nav>
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.speedY = (Math.random() - 0.5) * 0.3;
-                this.opacity = Math.random() * 0.5 + 0.1;
-                this.color = Math.random() > 0.8 ? '#4A3B8C' : '#8899B3';
-            }
+<div id="mmenu">
+  <a href="#univers">UNIVERS</a>
+  <a href="#musique">MUSIQUE</a>
+  <a href="#clips">CLIPS</a>
+  <a href="#visuels">VISUELS</a>
+  <!--<a href="#presskit">PRESS KIT</a>
+  <a href="#contact">CONTACT</a>-->
+</div>
 
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
+<aside id="rail" aria-hidden="true">
+  <span id="railLbl">PROFONDEUR DU RÊVE</span>
+  <div class="line"><div class="mark" id="railMark"></div></div>
+  <span id="railVal" style="font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;color:var(--argent)">−00 M</span>
+</aside>
 
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-            }
+<main>
+  <!-- ============ HERO ============ -->
+  <section id="hero">
+    <p class="kicker">Voix entre deux mondes</p>
+    <h1 id="heroTitle" aria-label="LISA NOX">LISA NOX</h1>
+    <p class="heroSub" data-reveal style="--d:.9s">Je suis celle qui rêve.<br>Chaque note est <strong>un fragment de rêve brisé</strong>.</p>
+    <div class="ctaRow" data-reveal style="--d:1.15s">
+      <a class="btn solid magnetic liquid" href="#univers">↓ ENTRER DANS LE RÊVE</a>
+      <a class="btn magnetic" href="#clips">VOIR LES CLIPS</a>
+    </div>
+    <div class="scrollHint" aria-hidden="true"><span class="tube"></span>DESCENTE ◈ CYCLE 01</div>
+  </section>
 
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = this.opacity;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
+  <!-- ============ UNIVERS ============ -->
+  <section id="univers">
+    <div class="xiii" aria-hidden="true">XIII</div>
+    <p class="kicker" data-reveal>Lore officiel ◈ dp/ONIROPHOBIE</p>
+    <h2 data-scramble data-reveal>ONIROPHOBIE</h2>
+    <p class="lead" data-reveal style="--d:.15s">LISA voit ce que les autres ne voient pas. Ses rêves annoncent la mort. Elle marche entre les lignes du destin, tissant des mélodies là où la réalité se fracture.</p>
+    <blockquote data-reveal style="--d:.25s">« La frontière entre le sommeil et l'éternité est plus fine qu'un fil de soie. »<footer>— LISA NOX, CYCLE 01</footer></blockquote>
 
-        function initParticles() {
-            const count = window.innerWidth < 768 ? 40 : 80;
-            for (let i = 0; i < count; i++) {
-                particles.push(new Particle());
-            }
-        }
+    <div class="cycles">
+      <article class="cycle" style="--i:0">
+        <div class="num">01</div>
+        <div>
+          <div class="tag">CYCLE 01 — SOMMEIL FRACTURÉ <span class="chip live">ACTIF</span></div>
+          <h3>LE PREMIER RÊVE</h3>
+          <p class="sub">Là où tout se fissure.</p>
+          <p>Les murs se dissolvent. La réalité cède. LISA découvre sa capacité à naviguer dans les limbes, là où les souvenirs des autres prennent forme.</p>
+        </div>
+      </article>
+      <article class="cycle" style="--i:1">
+        <div class="num">02</div>
+        <div>
+          <div class="tag">CYCLE 02 — ONIROPHOBIE <span class="chip live">ACTIF</span></div>
+          <h3>LA PEUR DE DORMIR</h3>
+          <p class="sub">Chaque nuit, un avertissement.</p>
+          <p>Chaque nuit apporte une vision. Chaque vision est un avertissement. La frontière s'amincit. La musique devient le seul fil qui la retient.</p>
+        </div>
+      </article>
+      <article class="cycle" style="--i:2">
+        <div class="num">03</div>
+        <div>
+          <div class="tag">CYCLE 03 — EN COURS <span class="chip">13 FRAGMENTS RESTANTS</span></div>
+          <h3>L'ÉCHO FINAL</h3>
+          <p class="sub">La convergence approche.</p>
+          <p>À venir. Ce cycle explorera la convergence des mondes. Les fragments s'assemblent. La vérité onirique se révèle.</p>
+        </div>
+      </article>
+    </div>
+  </section>
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateParticles);
-        }
+  <div class="marquee" aria-hidden="true">
+    <div class="mqTrack">
+      <span>RÊVE ◈ LUCIDE ◈ CAUCHEMAR ◈ LIMBES ◈ <b>13</b> ◈ CLIPS ◈ CE QUI DORT NE MENT JAMAIS ◈ RÊVE ◈ LUCIDE ◈ CAUCHEMAR ◈ LIMBES ◈ <b>13</b> ◈ CLIPS ◈ CE QUI DORT NE MENT JAMAIS ◈ </span>
+      <span>RÊVE ◈ LUCIDE ◈ CAUCHEMAR ◈ LIMBES ◈ <b>13</b> ◈ CLIPS  CE QUI DORT NE MENT JAMAIS ◈ RÊVE ◈ LUCIDE ◈ CAUCHEMAR ◈ LIMBES ◈ <b>13</b> ◈ CLIPS  CE QUI DORT NE MENT JAMAIS ◈ </span>
+    </div>
+  </div>
 
-        initParticles();
-        animateParticles();
+  <!-- ============ MUSIQUE ============ -->
+  <section id="musique">
+    <p class="kicker" data-reveal>Fragments sonores</p>
+    <h2 data-scramble data-reveal>MUSIQUE</h2>
+    <p class="lead" data-reveal style="--d:.12s">Extraits sonores des cycles. Intégration native Spotify & Apple Music. Activez la nappe onirique ◈ en bas à droite pour entrer pleinement.</p>
+    <div class="playerWrap" data-reveal style="--d:.2s">
+      <div class="frame">
+        <iframe title="LISA NOX sur Spotify" src="https://open.spotify.com/embed/artist/2rDmQV27WZynR1Bq62C0aA?utm_source=generator&theme=0" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+      </div>
+      <div class="vizBox">
+        <div class="vh"><span>VISUALISEUR ONIRIQUE</span><span id="vizState">VEILLE</span></div>
+        <canvas id="viz"></canvas>
+        <div class="vh"><span>−24 LUFS ◈ NAPPE DISCRÈTE</span><span>WCAG ◈ TOGGLE EXPLICITE</span></div>
+      </div>
+    </div>
+    <div class="linkRow" data-reveal style="--d:.3s">
+      <a class="slink primary magnetic" href="https://open.spotify.com/intl-fr/artist/2rDmQV27WZynR1Bq62C0aA?utm_source=website&utm_medium=referral&utm_campaign=lisanox_launch" target="_blank" rel="noopener">SPOTIFY</a>
+      <a class="slink magnetic" href="https://music.apple.com/us/artist/lisa-nox/1890800102?utm_source=website&utm_medium=referral&utm_campaign=lisanox_launch" target="_blank" rel="noopener">APPLE MUSIC</a>
+      <button class="slink magnetic" id="preSave">PRE-SAVE CYCLE 03 ◈ 13</button>
+    </div>
+  </section>
+
+  <!-- ============ CLIPS / LECTEUR VIDÉO ============ -->
+  <section id="clips">
+    <p class="kicker" data-reveal>Les visions animées</p>
+    <h2 data-scramble data-reveal>CLIPS / VIDÉOS</h2>
+    <p class="lead" data-reveal style="--d:.12s">Les clips des singles, projetés dans le rêve. Trois sources, une seule playlist : votre liste collée dans le code (bloc ◈ MA PLAYLIST ◈), le dossier <b style="color:var(--argent);font-weight:400">/videos/</b> du site (playlist.json auto-détecté), ou un lien collé ci-dessous (mémorisé dans ce navigateur).</p>
+
+    <!-- ══════════════════════════════════════════════════════════
+         ◈ ◈ ◈  MA PLAYLIST — COLLEZ VOS LIENS ICI  ◈ ◈ ◈
+         Une ligne par clip :  { "t": "TITRE", "src": "LIEN" }
+         Liens acceptés : YouTube / youtu.be / shorts / Vimeo /
+         Dailymotion / .mp4 en ligne / fichier du site.
+         Fichier du site :  "src": "videos/mon-clip.mp4"
+         (ou simplement "mon-clip.mp4" → cherché dans /videos/)
+         Poster optionnel : "poster": "visuels/cover.jpg"
+         Laissez "src": "" pour un slot endormi, à éveiller plus tard.
+               { "t": "LA FUITE — CLIP OFFICIEL", "src": "https://youtu.be/QD2i8UWp6hk?si=u5CBqA6zJxujHpMT" },
+      { "t": "L'ÉCHO FINAL — TEASER",    "src": "" }
+             { "t": "",   "src": "" }
+      { "t": "",   "src": "" }
+      { "t": "",   "src": "" }
+         ══════════════════════════════════════════════════════════ -->
+    <script type="application/json" id="ma-playlist">
+    [
+      { "t": "JE SUIS CELLE QUI RÊVE",   "src": "https://youtu.be/dnDUHVQ5JMA?si=hwjNNSpa63pXdkIN" },
+      { "t": "LES YEUX QUI VOIENT TROP LOIN", "src": "https://youtu.be/QD2i8UWp6hk?si=u5CBqA6zJxujHpMT" },
+      { "t": "CE QUE MES RÊVES NE DISENT PAS",    "src": "https://youtu.be/BUuA5O6XUZg?si=yBkrhx6gzpJboI8E" },
+      { "t": "ENTRE RÊVE ET MORT",   "src": "https://youtu.be/npsQuNQFzx8?si=eq8UuexJ0mQsIuWL" },
+      { "t": "PRISONNIERE DU SOMMEIL",   "src": "https://youtu.be/jQE8CYBEo08?si=lFKKW9-1BrG3uTgG" }, 
+      { "t": "REQUIEM DES REVES",   "src": "https://youtu.be/Lk3tSE3E3PE?si=Ko1GFuPBl0_HJp69" },
+      {"t": "Teaser","src": "./assets/clip/trailer.mp4" },
+      {"t": "Teaser","src": "./assets/clip/trailer-1.mp4" },
+      {"t": "Teaser","src": "./assets/clip/trailer-2.mp4" }
+
+    ]
     </script>
 
+    <div class="clipsGrid" data-reveal style="--d:.2s">
+      <div>
+        <div class="playerFrame">
+          <span class="cnr tl"></span><span class="cnr tr"></span><span class="cnr bl"></span><span class="cnr br"></span>
+          <div class="scan" aria-hidden="true"></div>
+          <div class="pbadgeWrap" aria-hidden="true">
+            <span class="grp"><span class="rec"></span>DREAM FEED</span>
+            <span class="grp" id="slotBadge">SLOT ◈ --/13</span>
+          </div>
+          <div id="playerStage"></div>
+        </div>
+        <div class="clipTitle">
+          <b id="nowTitle">FRAGMENT EN SOMMEIL</b>
+          <i id="nowMeta">AUCUN LIEN ÉVEILLÉ</i>
+        </div>
+        <div class="addbar">
+          <input type="url" id="clipUrl" placeholder="Coller un lien YouTube / Vimeo / Dailymotion / .mp4 / videos/…" aria-label="Lien vidéo à éveiller">
+          <input type="text" id="clipTitleIn" placeholder="Titre du clip (optionnel)" aria-label="Titre du clip" style="flex:.6">
+          <button class="btn solid magnetic" id="clipAdd">ÉVEILLER ◈ 13</button>
+        </div>
+        <p class="hint">
+          <b>SOURCE 1 ◈ CODE</b> : bloc &lt;script id="ma-playlist"&gt; dans index.html — votre liste officielle, prioritaire.<br>
+          <b>SOURCE 2 ◈ DOSSIER /videos/</b> : déposez-y playlist.json (tableau de liens ou d'objets {t,src}) + vos .mp4 — détection automatique au chargement.<br>
+          <b>SOURCE 3 ◈ ICI</b> : collez un lien → ajouté et mémorisé dans ce navigateur. ✎ remplace ◈ ✕ dissout ◈ RESET rend la main au code.<br>
+          FORMATS : youtube • youtu.be • shorts • vimeo • dailymotion • .mp4/.webm/.mov • chemin relatif videos/…
+          <button id="clipReset" type="button">◈ RÉINITIALISER (RENDRE LA MAIN AU CODE)</button>
+        </p>
+      </div>
 
+      <div class="playlist" id="playlist" role="list" aria-label="Playlist des clips">
+        <div class="plistHead">
+          <span id="slotCount">SLOTS ◈ 03/13</span>
+          <button id="editToggle" type="button" aria-pressed="false">MODE ÉDITION ◈ OFF</button>
+        </div>
+        <div class="srcLegend" aria-hidden="true">
+          <span><u style="color:var(--indigo);text-decoration:none">CODE</u> liste du site</span>
+          <span><u style="color:var(--indigo);text-decoration:none">/VIDEOS</u> dossier du site</span>
+          <span><u style="color:var(--indigo);text-decoration:none">LOCAL</u> vos ajouts</span>
+        </div>
+        <!-- items injectés par JS -->
+      </div>
+    </div>
+  </section>
 
-<!-- Container "13" (Overlay) -->
-<div id="thirteen-layer" style="position:fixed; inset:0; pointer-events:none; z-index:5; overflow:hidden;"></div>
+  <!-- ============ VISUELS ============ -->
+  <section id="visuels">
+    <p class="kicker" data-reveal>Fenêtres sur l'invisible</p>
+    <h2 data-scramble data-reveal>VISUELS / COVERS</h2>
+    <p class="lead" data-reveal style="--d:.12s">Générés, sélectionnés, révélés. Sept fragments capturés entre les cycles — filtrez par état de conscience.</p>
+    <div class="filters" role="group" aria-label="Filtrer les visuels">
+      <button class="fbtn on" data-f="tous">TOUS</button>
+      <button class="fbtn" data-f="lucide">RÊVE LUCIDE</button>
+      <button class="fbtn" data-f="cauchemar">CAUCHEMAR</button>
+      <button class="fbtn" data-f="limbes">LIMBES</button>
+    </div>
+    <div class="vgrid" id="vgrid">
+      <figure class="vitem" data-cat="limbes">
+        <span class="cat">LIMBES</span>
+        <img src="assets/image/LISA-23.jpg" alt="Éther Cristallin — cristaux flottants dans un vide indigo" loading="lazy">
+        <figcaption><h4>Éther Cristallin</h4><p class="meta">Qwen-Image • floating crystals • 13.01.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="cauchemar">
+        <span class="cat">CAUCHEMAR</span>
+        <img src="assets/image/LISA-10.jpg" alt="Ombre Déformée — portrait dissous dans la fumée, halo violet" loading="lazy">
+        <figcaption><h4>Shoot urbain</h4><p class="meta">Wan • LISA dans le train interlevel • 13.02.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="limbes">
+        <span class="cat">LIMBES</span>
+        <img src="assets/image/LISA-1.jpg" alt="Zone Nulle — nébuleuse éthérée au cœur violet" loading="lazy">
+        <figcaption><h4>Zone Nulle</h4><p class="meta">Qwen-Image • ethereal void • 13.03.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="lucide">
+        <span class="cat">RÊVE LUCIDE</span>
+        <img src="assets/image/LISA-12.jpg" alt="Convergence — géométries sacrées de cristal sous un faisceau de lumière" loading="lazy">
+        <figcaption><h4>Concert virtuel</h4><p class="meta">Qwen-Image • le premier concert face a son public • 13.04.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="cauchemar">
+        <span class="cat">CAUCHEMAR</span>
+        <img src="assets/image/LISA-13.png" alt="Miroir Fracturé — éclats radiaux reflétant une rue habitée" loading="lazy">
+        <figcaption><h4>Clip Je suis celle qui rêve</h4><p class="meta">Wan • classe de LISA • 13.05.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="cauchemar">
+        <span class="cat">CAUCHEMAR</span>
+        <img src="assets/image/LISA-53.jpg" alt="La Fuite — silhouette courant dans un couloir de fumée indigo" loading="lazy">
+        <figcaption><h4>La Fuite</h4><p class="meta">Wan • LISA nightmare run • 13.03.2026</p></figcaption>
+      </figure>
+      <figure class="vitem" data-cat="lucide">
+        <span class="cat">RÊVE LUCIDE</span>
+        <img src="assets/image/LISA-42.jpg" alt="Apesanteur — femme flottant les yeux clos dans un espace étoilé" loading="lazy">
+        <figcaption><h4>COVER</h4><p class="meta">Wan • LISA lucid dream • 13.01.2026</p></figcaption> 
+      </figure>
+      <figure class="vitem" data-cat="lucide">
+        <span class="cat">RÊVE LUCIDE</span>
+        <img src="assets/image/LISA-14.jpg" alt="Apesanteur — femme flottant les yeux clos dans un espace étoilé" loading="lazy">
+        <figcaption><h4>COVER</h4><p class="meta">Wan • LISA lucid dream • 13.01.2026</p></figcaption> 
+      </figure>
+      <figure class="vitem" data-cat="lucide">
+        <span class="cat">RÊVE LUCIDE</span>
+        <img src="assets/image/LISA-20.jpg" alt="Apesanteur — femme flottant les yeux clos dans un espace étoilé" loading="lazy">
+        <figcaption><h4>Reve</h4><p class="meta">Wan • LISA chambre innondee • 13.04.2026</p></figcaption> 
+      </figure>
 
-<!-- Styles pour l'animation et le rendu visuel -->
-<style>
-    /* Conteneur de chaque "13" */
-    .thirteen {
-        position: absolute;
-        pointer-events: none;
-        transform: rotate(var(--rotation));
-        transform-origin: center;
-        will-change: transform, opacity;
-    }
+    </div>
+  </section>
 
-    /* Le SVG en lui-même */
-    .thirteen svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
+  <!-- ============ PRESS KIT ============ 
+  <section id="presskit">
+    <p class="kicker" data-reveal>Accès médias</p>
+    <h2 data-scramble data-reveal>PRESS KIT</h2>
+    <div class="card" data-reveal style="--d:.15s;margin-top:3rem">
+      <div class="pkRow">
+        <p class="lead" style="margin:0">Biographie officielle, visuels HD 3000px, logos vectoriels, contacts presse et liens streaming. Tout l'univers, dans un seul fichier.</p>
+        <button class="btn solid magnetic liquid" id="pkBtn">TÉLÉCHARGER (PDF)</button>
+      </div>
+      <p class="pkMeta">FICHIER: LISANOX_PressKit_2026.pdf ◈ MISE À JOUR: MAI 2026 ◈ 13 PAGES ◈ 12.4 MB</p>
+    </div>
+  </section>
+-->
+  <!-- ============ CONTACT ============ 
+  <section id="contact">
+    <p class="kicker" data-reveal>Le cercle</p>
+    <h2 data-scramble data-reveal>REJOINDRE</h2>
+    <div class="duo">
+      <div class="card" data-reveal style="--d:.1s">
+        <h3 style="font-family:var(--disp);letter-spacing:.14em;font-size:1.2rem">ENTRER DANS LE CERCLE</h3>
+        <p class="lead" style="margin-top:1rem;font-size:.95rem">Recevez en avant-première les fragments audio, les visuels exclusifs et les annonces des prochains cycles. Lead magnet : fond d'écran HD + extrait 30s.</p>
+        <form id="nlForm" novalidate>
+          <div class="field">
+            <input type="email" id="nlMail" placeholder="votre@email.com" aria-label="Adresse email" required>
+            <button class="btn solid magnetic" type="submit">VALIDER</button>
+          </div>
+          <p class="legal">Double opt-in requis. Aucun spam. Désinscription en un clic. <a href="#" style="color:var(--argent)">Politique RGPD</a></p>
+        </form>
+      </div>
+      <div class="card" data-reveal style="--d:.2s">
+        <h3 style="font-family:var(--disp);letter-spacing:.14em;font-size:1.2rem">SOUTENIR LE RÊVE</h3>
+        <p class="lead" style="margin-top:1rem;font-size:.95rem">Accédez à l'interdit. Soutenez la création et découvrez les coulisses de l'Onirophobie.</p>
+        <div class="linkRow" style="margin-top:1.6rem">
+          <a class="slink primary magnetic" href="https://fr.tipeee.com/onirophobie" target="_blank" rel="noopener">SOUTENIR LISA NOX</a>
+        </div>
+      </div>
+    </div>
+  </section>-->
+</main>
 
-    /* Le tracé (Path) du 13 */
-    .thirteen path {
-        fill: none;
-        stroke: currentColor;
-        stroke-width: var(--stroke-width, 2);
-        stroke-linecap: round;
-        stroke-linejoin: round;
-        
-        /* Préparation de l'animation "dessin" */
-        stroke-dasharray: var(--dash-length, 160);
-        stroke-dashoffset: var(--dash-length, 160);
-        
-        /* Animations : Écriture puis Disparition */
-        animation: write var(--write-duration, 3s) cubic-bezier(0.4, 0, 0.2, 1) forwards, 
-                   fadeOut 1.5s ease-in var(--fade-delay, 3s) forwards;
-    }
+<footer>
+  <div class="fRow">
+    <a class="brand" href="#hero">LISA<em>◈</em>NOX</a>
+    <span class="xiiiSm" aria-hidden="true">◈ 13 ◈</span>
+    <ul class="fLinks">
+      <li><a href="#">MENTIONS</a></li>
+      <li><a href="#">RGPD</a></li>
+      <li><a href="https://fr.tipeee.com/onirophobie" target="_blank" rel="noopener">TIPEEE</a></li>
+    </ul>
+  </div>
+  <p class="copy">© 2026 LISA NOX — UNIVERS dp/ DEVEN PHOBE ◈ CE QUI DORT NE MENT JAMAIS ◈ #LISANOX #ONIROPHOBIE</p>
+</footer>
 
-    /* Variante PREMIER PLAN */
-    .thirteen.foreground {
-        z-index: 20;
-        filter: drop-shadow(0 0 var(--glow-size, 10px) currentColor);
-        opacity: 0.95;
-    }
+<div id="soundDock">
+  <span id="soundLbl">NAPPE ONIRIQUE</span>
+  <button id="soundBtn" aria-pressed="false" aria-label="Activer la nappe sonore onirique"><i></i><i></i><i></i></button>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
 
-    /* Variante ARRIÈRE-PLAN */
-    .thirteen.background {
-        z-index: 1;
-        opacity: 0.5;
-        filter: drop-shadow(0 0 var(--glow-size, 15px) currentColor);
-    }
+<noscript><style>#loader{display:none}[data-reveal]{opacity:1;transform:none;filter:none}#heroTitle .ltr{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 
-    /* Keyframes d'animation */
-    @keyframes write {
-        to { stroke-dashoffset: 0; }
-    }
-    @keyframes fadeOut {
-        to { opacity: 0; transform: rotate(var(--rotation)) scale(0.9); }
-    }
-
-    /* Ajustement Mobile */
-    @media (max-width: 768px) {
-        .thirteen { max-width: 150px; max-height: 150px; }
-    }
-</style>
-
-<!-- Script de génération et d'animation -->
 <script>
-(function() {
-    // === ⚙️ PARAMÈTRES AJUSTABLES ===
-    const CONFIG = {
-        // Taille : base en px, multiplicateur max (1x à 5x)
-        sizeBase: 60,
-        sizeMaxMultiplier: 5,
-        
-        // Palette de couleurs (ajoute/supprime des hex ici)
-        colors: [
-            { hex: '#4A3B8C', name: 'violet', glow: 0.5 },   // Indigo dp
-            { hex: '#FF00AA', name: 'fuchsia', glow: 0.8 },  // Néon rose
-            { hex: '#8899B3', name: 'argent', glow: 0.6 }    // Silver dp
-        ],
-        
-        // Variations de forme "13" manuscrit (SVG paths)
-        // Ajoute autant de variations que tu veux ici
-        paths: [
-           // Style 1: perso/ calligraphique
-            "m 2 5 L 5 1 L 5 22 M 12 1 C 14 1 18 1 19 4 C 19 7 17 8 14 10 C 14 10 19 11 20 13 C 22 16 20 22 11 22",
+(function(){
+"use strict";
+var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var FINE = window.matchMedia('(pointer: fine)').matches;
+if(FINE) document.body.classList.add('fine');
 
-           // Style 1: Élégant / calligraphique
-                "M 20 15 L 18 50 M 30 15 C 50 5, 55 25, 45 30 C 55 35, 45 50, 25 50",
-            // Style 5: Fluide / continu
-                "M 20 15 L 18 50 M 30 15 C 52 8, 58 22, 52 32 C 58 42, 48 52, 28 52",
-            // Style 7: Dramatique / contrasté
-                "M 22 10 L 18 52 M 34 14 C 54 6, 56 26, 46 32 C 54 40, 46 52, 26 52"
-        
-        ],
-        
-        // Épaisseur du trait (min/max en px)
-        strokeWidthMin: 1.5,
-        strokeWidthMax: 4,
-        
-        // Vitesse d'écriture (min/max en secondes)
-        writeDurationMin: 2,
-        writeDurationMax: 4,
-        
-        // Délai avant disparition (après la fin de l'écriture)
-        fadeDelay: 1,
-        
-        // Fréquence d'apparition (min/max en ms)
-        spawnDelayMin: 6000,
-        spawnDelayMax: 15000,
-        
-        // Maximum de "13" simultanés à l'écran
-        maxInstances: 3,
-        
-        // Probabilité d'être au premier plan (0.0 à 1.0)
-        foregroundProbability: 0.25,
-        
-        // Rotation max en degrés (-X à +X)
-        rotationMax: 35,
-        
-        // Marges par rapport aux bords de l'écran (en px)
-        margin: 40
-    };
+/* ---------- TOAST + TRACK ---------- */
+var toastEl = document.getElementById('toast'), toastT = null;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function(){ toastEl.classList.remove('show'); }, 2800); }
+function track(evt, data){ if(window.dataLayer) window.dataLayer.push({event:evt, dream:data||null}); console.info('[dp/ONIROPHOBIE] ' + evt, data || ''); }
 
-    // === LOGIQUE INTERNE (ne pas modifier sauf si nécessaire) ===
-    const layer = document.getElementById('thirteen-layer');
-    let activeCount = 0;
+/* ---------- LOADER ---------- */
+var ltxt = document.getElementById('loaderText');
+'CE QUI DORT NE MENT JAMAIS'.split('').forEach(function(ch,i){
+  var s = document.createElement('span');
+  s.textContent = ch === ' ' ? '\u00A0' : ch;
+  s.style.animationDelay = (0.25 + i*0.045) + 's';
+  ltxt.appendChild(s);
+});
+var heroTitle = document.getElementById('heroTitle');
+(function splitHero(){
+  var txt = heroTitle.textContent.trim(); heroTitle.textContent = '';
+  txt.split('').forEach(function(ch,i){
+    var s = document.createElement('span');
+    if(ch === ' '){ s.className = 'ltr sp'; s.innerHTML = '&nbsp;'; }
+    else { s.className = 'ltr'; s.textContent = ch; }
+    s.style.setProperty('--d', (2.1 + i*0.07) + 's');
+    heroTitle.appendChild(s);
+  });
+})();
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    document.getElementById('loader').classList.add('gone');
+    document.body.classList.add('awake');
+  }, RM ? 200 : 2000);
+});
 
-    // Fonction utilitaire : nombre aléatoire entre min et max
-    const rand = (min, max) => Math.random() * (max - min) + min;
-    
-    // Fonction utilitaire : élément aléatoire d'un tableau
-    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+/* ---------- CURSEUR ---------- */
+var dot = document.getElementById('curDot'), ring = document.getElementById('curRing');
+var mx = innerWidth/2, my = innerHeight/2, dx = mx, dy = my, rx = mx, ry = my;
+addEventListener('mousemove', function(e){ mx = e.clientX; my = e.clientY; }, {passive:true});
+if(FINE && !RM){
+  document.addEventListener('mouseover', function(e){ if(e.target.closest('a, button, .clip, .vitem, input')) ring.classList.add('big'); });
+  document.addEventListener('mouseout', function(e){ if(e.target.closest('a, button, .clip, .vitem, input')) ring.classList.remove('big'); });
+}
 
-    // Fonction principale pour créer un "13"
-    const spawnThirteen = () => {
-        if (activeCount >= CONFIG.maxInstances) return;
-        activeCount++;
+/* ---------- WEBGL NÉBULEUSE ---------- */
+var glc = document.getElementById('dreamGL'), gl = glc.getContext('webgl') || glc.getContext('experimental-webgl');
+var uT, uR, uM, uS;
+if(gl){
+  var VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var FS = [
+  'precision highp float;uniform vec2 uR;uniform float uT;uniform vec2 uM;uniform float uS;',
+  'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}',
+  'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}',
+  'float fbm(vec2 p){float v=0.;float a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(1.7);a*=.5;}return v;}',
+  'void main(){',
+  ' vec2 uv=(gl_FragCoord.xy-.5*uR)/uR.y;',
+  ' vec2 m=(uM-.5*uR)/uR.y;',
+  ' float t=uT*.045;',
+  ' vec2 q=vec2(fbm(uv*1.7+vec2(0.,t)),fbm(uv*1.7+vec2(5.2,1.3)-t));',
+  ' vec2 r=vec2(fbm(uv*1.7+2.6*q+vec2(1.7,9.2)+t*.6),fbm(uv*1.7+2.6*q+vec2(8.3,2.8)-t*.4));',
+  ' float f=fbm(uv*1.7+2.2*r);',
+  ' float d=length(uv-m);',
+  ' f+=.18*smoothstep(.7,0.,d)*sin(9.*d-uT*1.4);',
+  ' vec3 col=vec3(.039,.039,.063);',
+  ' vec3 ind=vec3(.29,.231,.549);',
+  ' vec3 sil=vec3(.533,.6,.702);',
+  ' col=mix(col,ind*.62,smoothstep(.25,.85,f)*(.5+.22*sin(uT*.18)));',
+  ' col=mix(col,sil*.4,pow(smoothstep(.55,1.,f),3.)*.55);',
+  ' col+=ind*.14*smoothstep(.95,.15,d);',
+  ' vec2 sp=uv*9.;vec2 si=floor(sp);float sh=h(si+floor(uT*.4));',
+  ' float tw=.5+.5*sin(uT*2.2+sh*44.);',
+  ' float star=smoothstep(.996,1.,sh)*tw*smoothstep(.14,0.,length(fract(sp)-.5));',
+  ' col+=sil*star*1.35;',
+  ' float v=smoothstep(1.45,.3,length(uv));',
+  ' col*=.5+.5*v;',
+  ' col=mix(col,col*vec3(1.06,.9,1.25),uS*.55);',
+  ' gl_FragColor=vec4(col,1.);}'
+  ].join('');
+  function mkSh(type,src){ var s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s; }
+  var prog = gl.createProgram();
+  gl.attachShader(prog, mkSh(gl.VERTEX_SHADER, VS));
+  gl.attachShader(prog, mkSh(gl.FRAGMENT_SHADER, FS));
+  gl.linkProgram(prog);
+  if(gl.getProgramParameter(prog, gl.LINK_STATUS)){
+    gl.useProgram(prog);
+    var buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+    var loc = gl.getAttribLocation(prog,'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    uT = gl.getUniformLocation(prog,'uT'); uR = gl.getUniformLocation(prog,'uR');
+    uM = gl.getUniformLocation(prog,'uM'); uS = gl.getUniformLocation(prog,'uS');
+  } else { gl = null; document.body.classList.add('nogl'); }
+} else { document.body.classList.add('nogl'); }
+function sizeGL(){
+  if(!gl) return;
+  var dpr = Math.min(devicePixelRatio||1, 1.5);
+  glc.width = innerWidth*dpr; glc.height = innerHeight*dpr;
+  gl.viewport(0,0,glc.width,glc.height);
+}
+sizeGL(); addEventListener('resize', sizeGL);
 
-        // 1. Taille aléatoire (1x à 5x la base)
-        const scale = rand(1, CONFIG.sizeMaxMultiplier);
-        const size = CONFIG.sizeBase * scale;
+/* ---------- HORLOGE 00:13 ---------- */
+var clockEl = document.getElementById('clock'), lock13 = false, glitching = false;
+function two(n){ return String(n).padStart(2,'0'); }
+function tickClock(){
+  if(lock13 || glitching){ clockEl.textContent = '00:13'; return; }
+  var d = new Date();
+  clockEl.textContent = two(d.getHours()) + ':' + two(d.getMinutes());
+}
+setInterval(tickClock, 1000); tickClock();
+setInterval(function(){
+  if(lock13 || RM) return;
+  glitching = true; clockEl.classList.add('glitch'); clockEl.textContent = '00:13';
+  setTimeout(function(){ glitching = false; clockEl.classList.remove('glitch'); tickClock(); }, 1300);
+}, 13000);
+clockEl.addEventListener('click', function(){
+  lock13 = !lock13;
+  clockEl.classList.toggle('glitch', lock13);
+  tickClock();
+  toast(lock13 ? '◈ TEMPS VERROUILLÉ À 00:13 — ELLE LE SAIT' : '◈ LE TEMPS REPREND SON COURS');
+});
 
-        // 2. Position aléatoire (avec marges)
-        const x = rand(CONFIG.margin, window.innerWidth - size - CONFIG.margin);
-        const y = rand(CONFIG.margin, window.innerHeight - size - CONFIG.margin);
+/* ---------- SCRAMBLE + REVEAL ---------- */
+var GLYPHS = '◈◇△▽XVI13▓▒░AEIOUNSTMR';
+function scramble(el){
+  var fin = el.dataset.txt || el.textContent;
+  el.dataset.txt = fin;
+  if(RM){ el.textContent = fin; return; }
+  var frame = 0, total = 26;
+  var iv = setInterval(function(){
+    frame++;
+    var out = '';
+    for(var i=0;i<fin.length;i++){
+      if(frame/total > i/fin.length + .25) out += fin[i];
+      else if(fin[i] === ' ') out += ' ';
+      else out += GLYPHS[(Math.random()*GLYPHS.length)|0];
+    }
+    el.textContent = out;
+    if(frame >= total + 8){ clearInterval(iv); el.textContent = fin; }
+  }, 34);
+}
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(en){
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      if(en.target.hasAttribute('data-scramble')) scramble(en.target);
+      io.unobserve(en.target);
+    }
+  });
+}, {threshold:.18, rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('[data-reveal],[data-scramble]').forEach(function(el){ io.observe(el); });
 
-        // 3. Choix de la couleur
-        const colorConfig = pick(CONFIG.colors);
-        
-        // 4. Choix du style d'écriture (path SVG)
-        const pathD = pick(CONFIG.paths);
-        
-        // 5. Calcul de la longueur du tracé pour l'animation (approximative)
-        // Plus le path est complexe, plus la dash-length doit être grande
-        const dashLength = 120 + (pathD.length * 0.8);
-        
-        // 6. Épaisseur du trait aléatoire
-        const strokeWidth = rand(CONFIG.strokeWidthMin, CONFIG.strokeWidthMax);
-        
-        // 7. Vitesse d'écriture aléatoire
-        const writeDuration = rand(CONFIG.writeDurationMin, CONFIG.writeDurationMax);
-        const fadeDelay = writeDuration + CONFIG.fadeDelay;
-        
-        // 8. Rotation aléatoire
-        const rotation = rand(-CONFIG.rotationMax, CONFIG.rotationMax);
-        
-        // 9. Premier plan ou arrière-plan ?
-        const isForeground = Math.random() < CONFIG.foregroundProbability;
-        
-        // 10. Taille du glow en fonction de la couleur et de l'échelle
-        const glowSize = (colorConfig.glow * 10) + (scale * 2);
+/* ---------- NAV ACTIVE ---------- */
+var secIO = new IntersectionObserver(function(es){
+  es.forEach(function(en){
+    if(en.isIntersecting){
+      document.querySelectorAll('.navlinks a').forEach(function(a){
+        a.classList.toggle('on', a.getAttribute('href') === '#' + en.target.id);
+      });
+    }
+  });
+}, {rootMargin:'-42% 0px -52% 0px'});
+document.querySelectorAll('main section[id]').forEach(function(s){ secIO.observe(s); });
 
-        // Création du conteneur
-        const el = document.createElement('div');
-        el.className = `thirteen ${isForeground ? 'foreground' : 'background'}`;
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-        el.style.width = `${size}px`;
-        el.style.height = `${size}px`;
-        el.style.color = colorConfig.hex;
-        el.style.setProperty('--rotation', `${rotation}deg`);
-        el.style.setProperty('--stroke-width', strokeWidth);
-        el.style.setProperty('--dash-length', dashLength);
-        el.style.setProperty('--write-duration', `${writeDuration}s`);
-        el.style.setProperty('--fade-delay', `${fadeDelay}s`);
-        el.style.setProperty('--glow-size', `${glowSize}px`);
-        
-        // Injection du SVG avec le path choisi
-        el.innerHTML = `
-            <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                <path d="${pathD}" />
-            </svg>
-        `;
-        
-        layer.appendChild(el);
-        
-        // Nettoyage automatique après la fin de l'animation
-        const totalDuration = (writeDuration + CONFIG.fadeDelay + 1.5) * 1000;
-        setTimeout(() => {
-            if (el.parentNode) {
-                el.style.transition = 'opacity 0.5s ease';
-                el.style.opacity = '0';
-                setTimeout(() => {
-                    el.remove();
-                    activeCount--;
-                }, 500);
-            }
-        }, totalDuration);
-    };
+/* ---------- BURGER ---------- */
+var burger = document.getElementById('burger');
+burger.addEventListener('click', function(){
+  var open = document.body.classList.toggle('menu');
+  burger.setAttribute('aria-expanded', open);
+});
+document.querySelectorAll('#mmenu a').forEach(function(a){
+  a.addEventListener('click', function(){ document.body.classList.remove('menu'); burger.setAttribute('aria-expanded','false'); });
+});
 
-    // Planification de la prochaine apparition
-    const scheduleNext = () => {
-        const delay = rand(CONFIG.spawnDelayMin, CONFIG.spawnDelayMax);
-        setTimeout(() => {
-            spawnThirteen();
-            scheduleNext();
-        }, delay);
-    };
-
-    // Démarrage après 3 secondes (laisser le loader du site finir)
-    setTimeout(scheduleNext, 3000);
-
-    // Pause si onglet inactif (économie ressources)
-    document.addEventListener('visibilitychange', () => {
-        // Optionnel : suspendre les spawns si l'onglet est caché
+/* ---------- MAGNETIC ---------- */
+if(FINE && !RM){
+  document.querySelectorAll('.magnetic').forEach(function(el){
+    el.addEventListener('mousemove', function(e){
+      var r = el.getBoundingClientRect();
+      var px = (e.clientX - r.left - r.width/2)/r.width;
+      var py = (e.clientY - r.top - r.height/2)/r.height;
+      el.style.transform = 'translate(' + px*14 + 'px,' + py*10 + 'px)';
     });
+    el.addEventListener('mouseleave', function(){ el.style.transform = ''; });
+  });
+}
+
+/* ---------- LIQUID ---------- */
+var turb = document.getElementById('liqTurb');
+setInterval(function(){
+  if(RM) return;
+  var t = performance.now()/1000;
+  turb.setAttribute('baseFrequency', (0.011 + 0.004*Math.sin(t*1.3)).toFixed(4) + ' ' + (0.055 + 0.02*Math.sin(t*.7)).toFixed(4));
+}, 90);
+
+/* ============================================================
+   LECTEUR VIDÉO — CLIPS DES SINGLES
+   SOURCE 1 : bloc <script id="ma-playlist"> dans le code HTML
+   SOURCE 2 : fichier videos/playlist.json (dossier vidéo du site)
+   SOURCE 3 : ajouts locaux (localStorage) — playlist personnelle
+   ============================================================ */
+var MAX_SLOTS = 13;                       /* ◈ chiffre du lore — augmentez si votre liste dépasse */
+var MANIFEST_URL = 'videos/playlist.json';/* ◈ dossier vidéo du site — déposez-y playlist.json + vos .mp4 */
+var POSTERS = [
+  'https://lisanox.com/assets/image/LISA-S10.png',
+  'https://lisanox.com/assets/image/LISA-S11.png',
+  'https://lisanox.com/assets/image/LISA-S12.png',
+];
+var K_C = 'lnox_clips_custom_v2', K_R = 'lnox_clips_removed_v2', K_O = 'lnox_clips_over_v2', K_T = 'lnox_clips_title_v2';
+function lsGet(k,d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+function normClip(c){
+  if(typeof c === 'string') return {t:c, src:c, poster:''};
+  return {t:(c.t || c.title || 'FRAGMENT'), src:(c.src || c.url || ''), poster:(c.poster || c.thumb || '')};
+}
+function resolveSrc(s){
+  s = (s||'').trim(); if(!s) return '';
+  if(/^(https?:)?\/\//i.test(s) || s.indexOf('./') === 0 || s.indexOf('/') === 0) return s;
+  if(/\.(mp4|webm|ogg|ogv|mov)(\?|#|$)/i.test(s)) return 'videos/' + s; /* fichier nu → dossier /videos/ */
+  return s;
+}
+var BASE = [];
+try{ BASE = JSON.parse(document.getElementById('ma-playlist').textContent || '[]'); }catch(e){ BASE = []; }
+if(!Array.isArray(BASE)) BASE = [];
+BASE = BASE.map(normClip);
+if(!BASE.length) BASE = [{t:'FRAGMENT ◈ 01', src:'', poster:''}];
+var remoteClips = [];
+
+var custom   = lsGet(K_C, []);
+var removed  = lsGet(K_R, []);
+var overS    = lsGet(K_O, {});
+var overT    = lsGet(K_T, {});
+var clips = [], currentId = null, pendingId = null;
+
+function buildClips(){
+  var out = [];
+  BASE.concat(remoteClips).forEach(function(c, i){
+    var id = 'b' + i;
+    if(removed.indexOf(id) >= 0) return;
+    var src = (overS[id] !== undefined) ? overS[id] : resolveSrc(c.src);
+    var t   = (overT[id]) ? overT[id] : c.t;
+    out.push({id:id, t:t, src:src, poster:c.poster || '', origin:(i < BASE.length ? 'CODE' : '/VIDEOS')});
+  });
+  custom.forEach(function(c){
+    if(removed.indexOf(c.id) >= 0) return;
+    var src = (overS[c.id] !== undefined) ? overS[c.id] : resolveSrc(c.src);
+    out.push({id:c.id, t:(overT[c.id] || c.t), src:src, poster:c.poster || '', origin:'LOCAL'});
+  });
+  return out.slice(0, MAX_SLOTS);
+}
+
+function parseVideo(url){
+  url = (url||'').trim();
+  if(!url) return null;
+  var m = url.match(/(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if(m) return {type:'YOUTUBE', embed:'https://www.youtube-nocookie.com/embed/' + m[1] + '?autoplay=1&rel=0&modestbranding=1', thumb:'https://i.ytimg.com/vi/' + m[1] + '/hqdefault.jpg'};
+  m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if(m) return {type:'VIMEO', embed:'https://player.vimeo.com/video/' + m[1] + '?autoplay=1', thumb:''};
+  m = url.match(/dailymotion\.com\/(?:embed\/)?video\/([a-zA-Z0-9]+)/);
+  if(m) return {type:'DAILYMOTION', embed:'https://www.dailymotion.com/embed/video/' + m[1] + '?autoplay=1', thumb:'https://www.dailymotion.com/thumbnail/video/' + m[1]};
+  if(/^https?:\/\//i.test(url) && !/\.(mp4|webm|ogg|ogv|mov)(\?|#|$)/i.test(url)) return {type:'FLUX WEB', embed:url, thumb:''};
+  return {type:'FICHIER', embed:url, thumb:''}; /* .mp4 en ligne ou fichier du dossier /videos/ */
+}
+function thumbFor(clip, i){
+  var p = parseVideo(clip.src);
+  return (p && p.thumb) || clip.poster || POSTERS[i % POSTERS.length];
+}
+
+var stage = document.getElementById('playerStage');
+var nowTitle = document.getElementById('nowTitle');
+var nowMeta = document.getElementById('nowMeta');
+var slotBadge = document.getElementById('slotBadge');
+var slotCount = document.getElementById('slotCount');
+var playlistEl = document.getElementById('playlist');
+var urlIn = document.getElementById('clipUrl');
+var titleIn = document.getElementById('clipTitleIn');
+
+function renderIdle(){
+  stage.innerHTML =
+    '<div class="idle">' +
+      '<div class="zzz">FRAGMENT EN SOMMEIL</div>' +
+      '<p>COLLEZ UN LIEN YOUTUBE / VIMEO / MP4<br>OU RENSEIGNEZ LE BLOC ◈ MA PLAYLIST ◈ DU CODE</p>' +
+      '<button class="btn magnetic" id="idlePaste" type="button">COLLER UN LIEN ◈ 13</button>' +
+    '</div>';
+  var b = document.getElementById('idlePaste');
+  if(b) b.addEventListener('click', function(){ urlIn.focus(); urlIn.classList.add('pulse'); setTimeout(function(){ urlIn.classList.remove('pulse'); }, 2200); });
+  nowTitle.textContent = 'FRAGMENT EN SOMMEIL';
+  nowMeta.textContent = 'AUCUN LIEN ÉVEILLÉ';
+  slotBadge.textContent = 'SLOT ◈ --/13';
+}
+
+function openClip(i){
+  var clip = clips[i];
+  if(!clip) return;
+  if(!clip.src){
+    pendingId = clip.id;
+    urlIn.placeholder = 'Coller le lien pour « ' + clip.t + ' »…';
+    urlIn.focus();
+    urlIn.classList.add('pulse');
+    setTimeout(function(){ urlIn.classList.remove('pulse'); }, 2200);
+    toast('◈ SLOT ' + two(i+1) + ' ENDORMI — COLLEZ UN LIEN POUR L’ÉVEILLER');
+    return;
+  }
+  currentId = clip.id;
+  var p = parseVideo(clip.src);
+  stage.classList.add('sw');
+  setTimeout(function(){
+    if(p.type === 'FICHIER'){
+      stage.innerHTML = '<video controls playsinline preload="metadata" poster="' + thumbFor(clip,i) + '" src="' + p.embed + '"></video>';
+    } else {
+      stage.innerHTML = '<iframe src="' + p.embed + '" title="' + clip.t.replace(/"/g,'') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web share" allowfullscreen loading="lazy"></iframe>';
+    }
+    stage.classList.remove('sw');
+  }, RM ? 0 : 280);
+  nowTitle.textContent = clip.t;
+  nowMeta.textContent = p.type + ' ◈ ' + clip.origin + ' ◈ SLOT ' + two(i+1) + '/' + MAX_SLOTS;
+  slotBadge.textContent = 'SLOT ◈ ' + two(i+1) + '/' + MAX_SLOTS;
+  renderPlaylist();
+  track('play_clip', {title: clip.t, type: p.type, origin: clip.origin, slot: i+1});
+  toast('◈ LECTURE : ' + clip.t);
+}
+
+function renderPlaylist(){
+  playlistEl.querySelectorAll('.clip').forEach(function(n){ n.remove(); });
+  clips.forEach(function(clip, i){
+    var el = document.createElement('article');
+    el.className = 'clip' + (clip.src ? '' : ' sleep') + (clip.id === currentId ? ' on' : '');
+    el.setAttribute('role','listitem');
+    el.setAttribute('tabindex','0');
+    var p = parseVideo(clip.src);
+    el.innerHTML =
+      '<span class="cidx">' + two(i+1) + '</span>' +
+      '<img class="cthumb" src="' + thumbFor(clip,i) + '" alt="" loading="lazy">' +
+      '<span class="cinfo"><b>' + clip.t + '</b><i><u>' + clip.origin + '</u> ◈ ' + (clip.src ? p.type : 'EN SOMMEIL ◈ LIEN REQUIS') + '</i></span>' +
+      '<span class="cacts">' +
+        '<button type="button" data-act="edit" title="Remplacer le lien" aria-label="Remplacer le lien de ' + clip.t.replace(/"/g,'') + '">✎</button>' +
+        '<button type="button" data-act="del" title="Supprimer" aria-label="Supprimer ' + clip.t.replace(/"/g,'') + '">✕</button>' +
+      '</span>';
+    el.addEventListener('click', function(){ openClip(i); });
+    el.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openClip(i); } });
+    el.querySelector('[data-act="edit"]').addEventListener('click', function(e){
+      e.stopPropagation();
+      pendingId = clip.id;
+      urlIn.value = clip.src || '';
+      urlIn.placeholder = 'Nouveau lien pour « ' + clip.t + ' »…';
+      titleIn.value = overT[clip.id] || '';
+      urlIn.focus();
+      toast('◈ ÉDITION DU SLOT ' + two(i+1) + ' (' + clip.origin + ')');
+    });
+    el.querySelector('[data-act="del"]').addEventListener('click', function(e){
+      e.stopPropagation();
+      if(clip.id.charAt(0) === 'b'){
+        removed.push(clip.id);
+        delete overS[clip.id]; delete overT[clip.id];
+        lsSet(K_R, removed); lsSet(K_O, overS); lsSet(K_T, overT);
+      } else {
+        custom = custom.filter(function(c){ return c.id !== clip.id; });
+        lsSet(K_C, custom);
+      }
+      if(currentId === clip.id){ currentId = null; renderIdle(); }
+      rebuildAll();
+      toast('◈ FRAGMENT DISSOUS — ' + clip.t);
+    });
+    var img = el.querySelector('.cthumb');
+    img.addEventListener('error', function(){ img.src = POSTERS[i % POSTERS.length]; }, {once:true});
+    playlistEl.appendChild(el);
+  });
+  if(clips.length === 0){
+    var ghost = document.createElement('article');
+    ghost.className = 'clip sleep';
+    ghost.innerHTML = '<span class="cidx">--</span><img class="cthumb" src="' + POSTERS[0] + '" alt=""><span class="cinfo"><b>SLOT VIDE</b><i>ÉVEILLEZ LE PREMIER FRAGMENT</i></span><span class="cacts"></span>';
+    ghost.addEventListener('click', function(){ urlIn.focus(); });
+    playlistEl.appendChild(ghost);
+  }
+  slotCount.textContent = 'SLOTS ◈ ' + two(clips.length) + '/' + MAX_SLOTS;
+}
+
+function rebuildAll(){
+  clips = buildClips();
+  if(currentId && !clips.some(function(c){ return c.id === currentId; })){ currentId = null; renderIdle(); }
+  renderPlaylist();
+}
+
+function submitClip(){
+  var url = urlIn.value.trim();
+  if(!url){ toast('◈ AUCUN LIEN — LE RÊVE ATTEND'); urlIn.focus(); return; }
+  var p = parseVideo(url);
+  if(!p){ toast('◈ LIEN ILLISIBLE PAR LE RÊVE — VÉRIFIEZ L’URL'); return; }
+  var title = titleIn.value.trim();
+  var targetId = null;
+  if(pendingId){
+    if(pendingId.charAt(0) === 'b'){
+      overS[pendingId] = url;
+      if(title) overT[pendingId] = title;
+      removed = removed.filter(function(id){ return id !== pendingId; });
+      lsSet(K_O, overS); lsSet(K_T, overT); lsSet(K_R, removed);
+    } else {
+      custom.forEach(function(c){ if(c.id === pendingId){ c.src = url; if(title) c.t = title; } });
+      lsSet(K_C, custom);
+    }
+    targetId = pendingId;
+    pendingId = null;
+  } else {
+    if(clips.length >= MAX_SLOTS){ toast('◈ ' + MAX_SLOTS + ' SLOTS — LE RÊVE EST SATURÉ'); return; }
+    targetId = 'c' + Date.now().toString(36);
+    custom.push({id: targetId, t: title || ('FRAGMENT ◈ ' + two(clips.length + 1)), src: url, poster: ''});
+    lsSet(K_C, custom);
+  }
+  urlIn.value = ''; titleIn.value = '';
+  urlIn.placeholder = 'Coller un lien YouTube / Vimeo / Dailymotion / .mp4 / videos/…';
+  rebuildAll();
+  var idx = clips.findIndex(function(c){ return c.id === targetId; });
+  if(idx >= 0) openClip(idx);
+  track('add_clip', {type: p.type, slot: idx + 1});
+}
+document.getElementById('clipAdd').addEventListener('click', submitClip);
+urlIn.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); submitClip(); } });
+titleIn.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); submitClip(); } });
+
+var editBtn = document.getElementById('editToggle');
+editBtn.addEventListener('click', function(){
+  var on = document.body.classList.toggle('editmode');
+  editBtn.classList.toggle('on', on);
+  editBtn.setAttribute('aria-pressed', on);
+  editBtn.textContent = 'MODE ÉDITION ◈ ' + (on ? 'ON' : 'OFF');
+  toast(on ? '◈ ÉDITION : ✎ REMPLACER ◈ ✕ DISSOUDRE' : '◈ ÉDITION REFERMÉE');
+});
+document.getElementById('clipReset').addEventListener('click', function(){
+  custom = []; removed = []; overS = {}; overT = {};
+  lsSet(K_C, custom); lsSet(K_R, removed); lsSet(K_O, overS); lsSet(K_T, overT);
+  pendingId = null; currentId = null;
+  rebuildAll(); renderIdle();
+  toast('◈ MAIN RENDUE AU CODE — LISTE OFFICIELLE RESTAURÉE');
+});
+
+/* ---------- SOURCE 2 : DOSSIER /videos/ ---------- */
+fetch(MANIFEST_URL, {cache:'no-store'}).then(function(r){
+  if(!r.ok) throw 0;
+  return r.json();
+}).then(function(list){
+  if(!Array.isArray(list)) return;
+  list.forEach(function(c){ remoteClips.push(normClip(c)); });
+  rebuildAll();
+  console.info('[dp/ONIROPHOBIE] dossier /videos/ : ' + list.length + ' fragment(s) ajouté(s)');
+  toast('◈ DOSSIER /VIDEOS/ CONNECTÉ — ' + list.length + ' FRAGMENT(S)');
+}).catch(function(){ /* pas de playlist.json : le rêve continue avec le code */ });
+
+rebuildAll();
+renderIdle();
+
+/* ---------- FILTRES VISUELS ---------- */
+var fbtns = document.querySelectorAll('.fbtn'), vitems = document.querySelectorAll('.vitem');
+fbtns.forEach(function(b){
+  b.addEventListener('click', function(){
+    fbtns.forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    var f = b.dataset.f;
+    var apply = function(){
+      vitems.forEach(function(it){
+        var show = (f === 'tous') || (it.dataset.cat === f);
+        it.classList.toggle('off', !show);
+        it.classList.remove('pop');
+        if(show && !RM){ void it.offsetWidth; it.classList.add('pop'); }
+      });
+    };
+    if(document.startViewTransition && !RM){ document.startViewTransition(apply); } else { apply(); }
+  });
+});
+
+/* ---------- AUDIO NAPPE ---------- */
+var AC = null, master = null, analyser = null, freqData = null, audioOn = false;
+function initAudio(){
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  master = AC.createGain(); master.gain.value = 0;
+  analyser = AC.createAnalyser(); analyser.fftSize = 128; analyser.smoothingTimeConstant = .82;
+  master.connect(analyser); analyser.connect(AC.destination);
+  freqData = new Uint8Array(analyser.frequencyBinCount);
+  
+  // ◈ CHARGEMENT DU FICHIER MP3 : asset/musique/ambiance-onirique.mp3
+  var audio = new Audio();
+  audio.src = 'assets/audio/ambiance-onirique.mp3';
+  audio.loop = true;
+  audio.crossOrigin = 'anonymous';
+  
+  var source = AC.createMediaElementSource(audio);
+  source.connect(master);
+  
+  // Démarrer la lecture (sera en pause tant que master.gain = 0)
+  audio.play().catch(function(e){ console.log('[dp/ONIROPHOBIE] Audio bloqué, en attente de l\'utilisateur'); });
+}
+var sBtn = document.getElementById('soundBtn'), vizState = document.getElementById('vizState');
+sBtn.addEventListener('click', function(){
+  if(!AC) initAudio();
+  AC.resume();
+  audioOn = !audioOn;
+  sBtn.classList.toggle('on', audioOn);
+  sBtn.setAttribute('aria-pressed', audioOn);
+  master.gain.cancelScheduledValues(AC.currentTime);
+  master.gain.linearRampToValueAtTime(audioOn ? .5 : 0, AC.currentTime + 1.2);
+  vizState.textContent = audioOn ? 'RÊVE ACTIF ◈ 13' : 'VEILLE';
+  toast(audioOn ? '◈ NAPPE ONIRIQUE ACTIVÉE — −24 LUFS' : '◈ SILENCE RETROUVÉ');
+});
+
+/* ---------- VISUALISEUR ---------- */
+var viz = document.getElementById('viz'), vctx = viz.getContext('2d');
+function sizeViz(){ viz.width = viz.clientWidth * Math.min(devicePixelRatio||1,2); viz.height = viz.clientHeight * Math.min(devicePixelRatio||1,2); }
+sizeViz(); addEventListener('resize', sizeViz);
+function drawViz(t){
+  var W = viz.width, H = viz.height, N = 48, bw = W/N;
+  vctx.clearRect(0,0,W,H);
+  if(audioOn && analyser){ analyser.getByteFrequencyData(freqData); }
+  for(var i=0;i<N;i++){
+    var v;
+    if(audioOn && freqData){ v = freqData[i % freqData.length]/255; }
+    else { v = .12 + .1*Math.abs(Math.sin(t*.0012 + i*.32)) + .04*Math.random(); }
+    var bh = Math.max(2, v*H*.92);
+    var g = vctx.createLinearGradient(0,H,0,H-bh);
+    g.addColorStop(0,'#4A3B8C'); g.addColorStop(1,'#8899B3');
+    vctx.fillStyle = g;
+    vctx.globalAlpha = .55 + v*.45;
+    vctx.fillRect(i*bw + bw*.22, H-bh, bw*.56, bh);
+  }
+  vctx.globalAlpha = 1;
+}
+
+/* ---------- BOUCLE PRINCIPALE ---------- */
+var railMark = document.getElementById('railMark'), railVal = document.getElementById('railVal');
+var smx = innerWidth/2, smy = innerHeight/2;
+function lnxTick(t){
+  dx += (mx-dx)*.22; dy += (my-dy)*.22;
+  rx += (mx-rx)*.12; ry += (my-ry)*.12;
+  dot.style.transform = 'translate(' + (dx-3) + 'px,' + (dy-3) + 'px)';
+  var rs = ring.classList.contains('big') ? 32 : 17;
+  ring.style.transform = 'translate(' + (rx-rs) + 'px,' + (ry-rs) + 'px)';
+  smx += (mx-smx)*.06; smy += (my-smy)*.06;
+  var docH = document.documentElement.scrollHeight - innerHeight;
+  var prog = docH > 0 ? Math.min(1, Math.max(0, scrollY/docH)) : 0;
+  railMark.style.top = (prog*100) + '%';
+  railVal.textContent = '−' + two(Math.round(prog*13)) + ' M';
+  document.getElementById('nav').classList.toggle('solid', scrollY > 40);
+  if(gl){
+    gl.uniform1f(uT, t*.001);
+    gl.uniform2f(uR, glc.width, glc.height);
+    gl.uniform2f(uM, smx*Math.min(devicePixelRatio||1,1.5), (innerHeight-smy)*Math.min(devicePixelRatio||1,1.5));
+    gl.uniform1f(uS, prog);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  drawViz(t);
+  requestAnimationFrame(lnxTick);
+}
+if(RM){
+  if(gl){
+    gl.uniform1f(uT, 13.13); gl.uniform2f(uR, glc.width, glc.height);
+    gl.uniform2f(uM, glc.width/2, glc.height/2); gl.uniform1f(uS, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  document.querySelectorAll('[data-reveal]').forEach(function(el){ el.classList.add('in'); });
+  drawViz(0);
+} else {
+  requestAnimationFrame(lnxTick);
+}
+
+/* ---------- DIVERS ---------- */
+document.getElementById('nlForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var mail = document.getElementById('nlMail');
+  if(!mail.value || mail.value.indexOf('@') < 1){ toast('◈ ADRESSE INVALIDE — LE RÊVE REFAIT SURFACE'); mail.focus(); return; }
+  this.innerHTML = '<p class="okMsg">◈ BIENVENUE DANS LE CERCLE.<br><span style="font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;color:var(--tf)">VÉRIFIE TA BOÎTE : LE PREMIER FRAGMENT T\'ATTEND. (13/13)</span></p>';
+  track('newsletter_signup');
+  toast('◈ INSCRIPTION CAPTURÉE — DOUBLE OPT-IN ENVOYÉ');
+});
+document.getElementById('preSave').addEventListener('click', function(){
+  toast('◈ PRE-SAVE ENREGISTRÉ — CYCLE 03 ◈ 13 FRAGMENTS');
+});
+document.getElementById('pkBtn').addEventListener('click', function(){
+  track('download_presskit');
+  toast('◈ TRANSMISSION : LISANOX_PressKit_2026.pdf ◈ 13 PAGES HD');
+});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click', function(e){
+    var id = a.getAttribute('href');
+    if(id.length > 1){
+      var t = document.querySelector(id);
+      if(t){ e.preventDefault(); t.scrollIntoView({behavior: RM ? 'auto' : 'smooth', block:'start'}); }
+    } else { e.preventDefault(); }
+  });
+});
 })();
 </script>
 </body>
 </html>
-
